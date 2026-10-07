@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Expiration Monitor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">P</div>
+            <span>ProductFlow</span>
+        </div>
+
+        <nav>
+            <a href="#" class="active">Dashboard</a>
+            <a href="#">Products</a>
+            <a href="#">Distribution</a>
+            <a href="#">Alerts</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <a href="#">Settings</a>
+            <a href="#">Logout</a>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+            <div>
+                <h1>Finished Products</h1>
+                <p>Monitor expiration dates and prioritize distribution.</p>
+            </div>
+
+            <div class="user">
+                <div class="avatar">AJ</div>
+                <div>
+                    <strong>Axel James</strong>
+                    <small>Administrator</small>
+                </div>
+            </div>
+        </header>
+
+        <!-- ALERT -->
+        <section class="alert-box">
+            <div class="alert-icon">!</div>
+            <div>
+                <strong>Expiration Alert</strong>
+                <p>3 products are nearing their expiration date.</p>
+            </div>
+            <button onclick="showExpiring()">View Products</button>
+        </section>
+
+        <!-- STAT CARDS -->
+        <section class="stats">
+
+            <div class="stat-card">
+                <span>Total Products</span>
+                <h2>128</h2>
+                <small>Finished products</small>
+            </div>
+
+            <div class="stat-card warning">
+                <span>Near Expiration</span>
+                <h2>3</h2>
+                <small>Within 30 days</small>
+            </div>
+
+            <div class="stat-card priority">
+                <span>For Distribution</span>
+                <h2>12</h2>
+                <small>High priority</small>
+            </div>
+
+            <div class="stat-card">
+                <span>Updated Today</span>
+                <h2>18</h2>
+                <small>Product records</small>
+            </div>
+
+        </section>
+
+        <!-- PRODUCT TABLE -->
+        <section class="content-card">
+
+            <div class="section-header">
+                <div>
+                    <h2>Products Nearing Expiration</h2>
+                    <p>Prioritize these products for distribution.</p>
+                </div>
+
+                <button class="filter-btn" onclick="filterProducts()">
+                    Filter
+                </button>
+            </div>
+
+            <div class="table-container">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Batch No.</th>
+                            <th>Quantity</th>
+                            <th>Expiration Date</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="productTable">
+
+                        <tr>
+                            <td>
+                                <strong>Product A</strong>
+                                <small>Finished Goods</small>
+                            </td>
+                            <td>BAT-2026-001</td>
+                            <td>120 units</td>
+                            <td>Oct 15, 2026</td>
+                            <td>
+                                <span class="badge danger">8 days left</span>
+                            </td>
+                            <td>
+                                <span class="priority-badge high">High</span>
+                            </td>
+                            <td>
+                                <button class="update-btn"
+                                    onclick="updateProduct('Product A')">
+                                    Update
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <strong>Product B</strong>
+                                <small>Finished Goods</small>
+                            </td>
+                            <td>BAT-2026-004</td>
+                            <td>85 units</td>
+                            <td>Oct 22, 2026</td>
+                            <td>
+                                <span class="badge warning">15 days left</span>
+                            </td>
+                            <td>
+                                <span class="priority-badge medium">Medium</span>
+                            </td>
+                            <td>
+                                <button class="update-btn"
+                                    onclick="updateProduct('Product B')">
+                                    Update
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <strong>Product C</strong>
+                                <small>Finished Goods</small>
+                            </td>
+                            <td>BAT-2026-008</td>
+                            <td>64 units</td>
+                            <td>Oct 29, 2026</td>
+                            <td>
+                                <span class="badge warning">22 days left</span>
+                            </td>
+                            <td>
+                                <span class="priority-badge medium">Medium</span>
+                            </td>
+                            <td>
+                                <button class="update-btn"
+                                    onclick="updateProduct('Product C')">
+                                    Update
+                                </button>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
