@@ -11,6 +11,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+
+    Route::get('admin', function () {
+        return Inertia::render('admin/index');
+    })->name('admin');
 });
 
 require __DIR__.'/settings.php';
