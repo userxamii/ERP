@@ -3,194 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Expiration Monitor</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="theme-color" content="#020a11">
+    <title>User Screens & Role Requirements</title>
+    <link rel="stylesheet" href="/product-monitor/style.css">
 </head>
-
 <body>
-
     <aside class="sidebar">
-        <div class="logo">
-            <div class="logo-icon">P</div>
-            <span>ProductFlow</span>
-        </div>
+        <a class="brand" href="#dashboard" aria-label="Warehouse Management home">
+            <span class="brand-name">Warehouse<span>Management</span></span>
+        </a>
 
-        <nav>
-            <a href="#" class="active">Dashboard</a>
-            <a href="#">Products</a>
-            <a href="#">Distribution</a>
-            <a href="#">Alerts</a>
+        <div class="nav-label">WORKSPACE</div>
+        <nav class="primary-nav" aria-label="Main navigation">
+            <a href="#dashboard" data-page="dashboard">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="11" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/></svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="#inventory" data-page="inventory">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4.3 7.7 7.7 4.4 7.7-4.4M12 12v9M8 5.2l8 4.6"/></svg>
+                <span>Inventory</span>
+            </a>
+            <a href="#aging" data-page="aging">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+                <span>Aging Inventory</span>
+            </a>
+            <a href="#expiring" data-page="expiring">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18m-9 4v3m0 0 2-2m-2 2-2-2"/></svg>
+                <span>Expiring Products</span>
+            </a>
+            <a href="#operations" data-page="operations">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6.5h16M7 12h10M10 17.5h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/></svg>
+                <span>Operations</span>
+            </a>
+            <a href="#alerts" data-page="alerts">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg>
+                <span>Alerts</span>
+                <span class="nav-count" id="navAlertCount" hidden></span>
+            </a>
         </nav>
 
-        <div class="sidebar-bottom">
-            <a href="#">Settings</a>
-            <a href="#">Logout</a>
+        <div class="sidebar-footer">
+            <a href="#settings" data-page="settings">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.7 1l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.7-1l-1.7.7-1.4-2.4L7.3 15a8 8 0 0 1 0-2l-1.4-1.1 1.4-2.4 1.7.7a8 8 0 0 1 1.7-1L11 7.4h2.8l.3 1.8a8 8 0 0 1 1.7 1l1.7-.7 1.4 2.4-1.4 1.1a8 8 0 0 1-.1 2Z"/></svg>
+                <span>Settings</span>
+            </a>
+            <a href="#logout" data-page="logout">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 17l5-5-5-5m5 5H3m9-9h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg>
+                <span>Logout</span>
+            </a>
+        </div>
+        <div class="sidebar-user">
+            <span class="avatar">WS</span>
+            <span><strong>Warehouse Staff</strong><small>Inventory team</small></span>
+            <span class="online-dot" aria-label="Online"></span>
         </div>
     </aside>
 
-    <main class="main">
-
+    <main class="main-shell">
         <header class="topbar">
-            <div>
-                <h1>Finished Products</h1>
-                <p>Monitor expiration dates and prioritize distribution.</p>
+            <div class="topbar-copy">
+                <p class="eyebrow">WAREHOUSE OPERATIONS</p>
+                <h1 id="pageTitle">Warehouse Management</h1>
+                <p id="pageSubtitle">Monitor inventory, aging items, and expiration dates.</p>
             </div>
-
-            <div class="user">
-                <div class="avatar">AJ</div>
-                <div>
-                    <strong>Axel James</strong>
-                    <small>Administrator</small>
+            <div class="topbar-actions">
+                <button class="notification-button" id="notificationButton" type="button" aria-label="View alerts">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg>
+                    <span id="headerAlertCount" class="notification-count" hidden></span>
+                </button>
+                <div class="profile">
+                    <span class="avatar">WS</span>
+                    <span class="profile-copy"><strong>Warehouse Staff</strong><small>Staff account</small></span>
+                    <svg class="chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
                 </div>
             </div>
         </header>
 
-        <!-- ALERT -->
-        <section class="alert-box">
-            <div class="alert-icon">!</div>
-            <div>
-                <strong>Expiration Alert</strong>
-                <p>3 products are nearing their expiration date.</p>
-            </div>
-            <button onclick="showExpiring()">View Products</button>
-        </section>
-
-        <!-- STAT CARDS -->
-        <section class="stats">
-
-            <div class="stat-card">
-                <span>Total Products</span>
-                <h2>128</h2>
-                <small>Finished products</small>
-            </div>
-
-            <div class="stat-card warning">
-                <span>Near Expiration</span>
-                <h2>3</h2>
-                <small>Within 30 days</small>
-            </div>
-
-            <div class="stat-card priority">
-                <span>For Distribution</span>
-                <h2>12</h2>
-                <small>High priority</small>
-            </div>
-
-            <div class="stat-card">
-                <span>Updated Today</span>
-                <h2>18</h2>
-                <small>Product records</small>
-            </div>
-
-        </section>
-
-        <!-- PRODUCT TABLE -->
-        <section class="content-card">
-
-            <div class="section-header">
-                <div>
-                    <h2>Products Nearing Expiration</h2>
-                    <p>Prioritize these products for distribution.</p>
-                </div>
-
-                <button class="filter-btn" onclick="filterProducts()">
-                    Filter
-                </button>
-            </div>
-
-            <div class="table-container">
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Batch No.</th>
-                            <th>Quantity</th>
-                            <th>Expiration Date</th>
-                            <th>Status</th>
-                            <th>Priority</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="productTable">
-
-                        <tr>
-                            <td>
-                                <strong>Product A</strong>
-                                <small>Finished Goods</small>
-                            </td>
-                            <td>BAT-2026-001</td>
-                            <td>120 units</td>
-                            <td>Oct 15, 2026</td>
-                            <td>
-                                <span class="badge danger">8 days left</span>
-                            </td>
-                            <td>
-                                <span class="priority-badge high">High</span>
-                            </td>
-                            <td>
-                                <button class="update-btn"
-                                    onclick="updateProduct('Product A')">
-                                    Update
-                                </button>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>
-                                <strong>Product B</strong>
-                                <small>Finished Goods</small>
-                            </td>
-                            <td>BAT-2026-004</td>
-                            <td>85 units</td>
-                            <td>Oct 22, 2026</td>
-                            <td>
-                                <span class="badge warning">15 days left</span>
-                            </td>
-                            <td>
-                                <span class="priority-badge medium">Medium</span>
-                            </td>
-                            <td>
-                                <button class="update-btn"
-                                    onclick="updateProduct('Product B')">
-                                    Update
-                                </button>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>
-                                <strong>Product C</strong>
-                                <small>Finished Goods</small>
-                            </td>
-                            <td>BAT-2026-008</td>
-                            <td>64 units</td>
-                            <td>Oct 29, 2026</td>
-                            <td>
-                                <span class="badge warning">22 days left</span>
-                            </td>
-                            <td>
-                                <span class="priority-badge medium">Medium</span>
-                            </td>
-                            <td>
-                                <button class="update-btn"
-                                    onclick="updateProduct('Product C')">
-                                    Update
-                                </button>
-                            </td>
-                        </tr>
-
-                    </tbody>
-                </table>
-
-            </div>
-
-        </section>
-
+        <section id="appView" class="page-content" aria-live="polite"></section>
     </main>
 
-    <script src="script.js"></script>
+    <div id="modalLayer" class="modal-layer" hidden>
+        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <div id="modalContent"></div>
+        </section>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+    <script src="/product-monitor/script.js" defer></script>
 </body>
 </html>
