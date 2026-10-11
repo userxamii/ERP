@@ -397,6 +397,53 @@ function getWarehouseDockSchedule(role) {
     return roleMap[role] || roleMap["Warehouse Staff"];
 }
 
+function getWarehouseZoneOverview(role) {
+    const roleMap = {
+        "Warehouse Staff": [
+            { zone: "Zone A", usage: "72%", status: "Stable", detail: "4 pallets awaiting pick review" },
+            { zone: "Zone B", usage: "86%", status: "Busy", detail: "Inbound staging active" },
+            { zone: "Zone C", usage: "58%", status: "Healthy", detail: "Production reserve available" },
+        ],
+        "Procurement Staff": [
+            { zone: "Dock 3", usage: "81%", status: "Busy", detail: "Supplier delivery window open" },
+            { zone: "Hold Bay B", usage: "64%", status: "Stable", detail: "Backorder materials staged" },
+            { zone: "Cold Storage", usage: "49%", status: "Healthy", detail: "Replenishment risk low" },
+        ],
+        "Production Staff": [
+            { zone: "Line 3", usage: "76%", status: "Busy", detail: "Material issue is scheduled" },
+            { zone: "Zone A", usage: "69%", status: "Stable", detail: "FEFO batches queued" },
+            { zone: "Zone C", usage: "51%", status: "Healthy", detail: "Reserve stock comfortable" },
+        ],
+        "Sales & Distribution Staff": [
+            { zone: "Outbound", usage: "70%", status: "Stable", detail: "Dispatch window still open" },
+            { zone: "Cold Chain", usage: "59%", status: "Healthy", detail: "Condition-controlled stock available" },
+            { zone: "Dock 1", usage: "82%", status: "Busy", detail: "Pickup cycle in progress" },
+        ],
+        "Quality Assurance (QA)": [
+            { zone: "QA Bay", usage: "66%", status: "Busy", detail: "Sample checks active" },
+            { zone: "Hold Area", usage: "77%", status: "Review", detail: "Damaged lots on watch" },
+            { zone: "Approved Stock", usage: "60%", status: "Healthy", detail: "Release queue moving" },
+        ],
+        "Finance Staff": [
+            { zone: "Control Room", usage: "45%", status: "Healthy", detail: "Inventory counts aligned" },
+            { zone: "Finance Desk", usage: "72%", status: "Busy", detail: "Variance review in progress" },
+            { zone: "Ops Desk", usage: "68%", status: "Stable", detail: "Closeout data synced" },
+        ],
+        Management: [
+            { zone: "Zone A", usage: "69%", status: "Stable", detail: "Aging watch is controlled" },
+            { zone: "Zone B", usage: "83%", status: "Busy", detail: "Storage pressure remains moderate" },
+            { zone: "Dock 1", usage: "74%", status: "Busy", detail: "Outbound flow under review" },
+        ],
+        "System Administrator": [
+            { zone: "Admin Suite", usage: "40%", status: "Healthy", detail: "No active access issues" },
+            { zone: "Ops App", usage: "68%", status: "Stable", detail: "Alert sync healthy" },
+            { zone: "Server Room", usage: "57%", status: "Healthy", detail: "Monitoring systems normal" },
+        ],
+    };
+
+    return roleMap[role] || roleMap["Warehouse Staff"];
+}
+
 function getRoleInsights(role) {
     const roleMap = {
         "Warehouse Staff": [
@@ -491,11 +538,26 @@ function getRecentActivity(role) {
     return roleMap[role] || roleMap["Warehouse Staff"];
 }
 
-const authState = {
-    isAuthenticated: localStorage.getItem("warehouse-auth") === "true",
-    role: localStorage.getItem("warehouse-role") || "Warehouse Staff",
+const roleTheme = {
+    "Warehouse Staff": { accent: "#1e2024", accentStrong: "#0b0d10", accentSoft: "#f3f4f6" },
+    "Procurement Staff": { accent: "#2a2d31", accentStrong: "#17191d", accentSoft: "#eef0f3" },
+    "Production Staff": { accent: "#3b3f45", accentStrong: "#1d2126", accentSoft: "#f0f2f4" },
+    "Sales & Distribution Staff": { accent: "#4b4f54", accentStrong: "#252a2e", accentSoft: "#f0f1f3" },
+    "Quality Assurance (QA)": { accent: "#5a5d61", accentStrong: "#2a2d31", accentSoft: "#f2f3f5" },
+    "Finance Staff": { accent: "#4c4f53", accentStrong: "#1d1f22", accentSoft: "#eef1f4" },
+    Management: { accent: "#2a2d31", accentStrong: "#101214", accentSoft: "#f4f5f6" },
+    "System Administrator": { accent: "#3d3f44", accentStrong: "#17191c", accentSoft: "#f1f3f5" },
 };
 
+const authState = {
+    isAuthenticated: false,
+    hasAccounts: false,
+    role: "Warehouse Staff",
+    email: "",
+    fullName: "",
+};
+
+let csrfToken = "";
 const readAlertIds = new Set();
 const appView = document.getElementById("appView");
 const pageTitle = document.getElementById("pageTitle");
@@ -522,6 +584,19 @@ function getRoleInitials(role) {
     return initials || "WM";
 }
 
+function applyRoleTheme() {
+    const theme = roleTheme[authState.role] || roleTheme["Warehouse Staff"];
+    const root = document.documentElement;
+
+    root.style.setProperty("--role-accent", theme.accent);
+    root.style.setProperty("--role-accent-strong", theme.accentStrong);
+    root.style.setProperty("--role-accent-soft", theme.accentSoft);
+    root.style.setProperty("--blue", theme.accent);
+    root.style.setProperty("--blue-soft", theme.accentSoft);
+    root.style.setProperty("--blue-dark", theme.accentStrong);
+    document.body.dataset.role = authState.role;
+}
+
 function syncProfile() {
     const sidebarUserName = document.querySelector(".sidebar-user strong");
     const profileName = document.querySelector(".profile-copy strong");
@@ -529,30 +604,33 @@ function syncProfile() {
     const profileSmall = document.querySelector(".profile-copy small");
     const sidebarAvatars = document.querySelectorAll(".sidebar-user .avatar");
     const profileAvatars = document.querySelectorAll(".profile .avatar");
-    const roleInitials = getRoleInitials(authState.role);
+    const accountName = authState.fullName || authState.role;
+    const accountInitials = getRoleInitials(accountName);
+
+    applyRoleTheme();
 
     if (sidebarUserName) {
-        sidebarUserName.textContent = authState.role;
+        sidebarUserName.textContent = accountName;
     }
 
     if (profileName) {
-        profileName.textContent = authState.role;
+        profileName.textContent = accountName;
     }
 
     if (sidebarUserSmall) {
-        sidebarUserSmall.textContent = authState.isAuthenticated ? "Signed in" : "Inventory team";
+        sidebarUserSmall.textContent = authState.isAuthenticated ? authState.role : "Inventory team";
     }
 
     if (profileSmall) {
-        profileSmall.textContent = authState.isAuthenticated ? "Staff account" : "Inventory team";
+        profileSmall.textContent = authState.isAuthenticated ? authState.role : "Inventory team";
     }
 
     sidebarAvatars.forEach(element => {
-        element.textContent = roleInitials;
+        element.textContent = accountInitials;
     });
 
     profileAvatars.forEach(element => {
-        element.textContent = roleInitials;
+        element.textContent = accountInitials;
     });
 
     document.querySelectorAll("[data-page]").forEach(link => {
@@ -562,34 +640,111 @@ function syncProfile() {
     });
 }
 
-function renderLoginPage() {
+function renderAccountOptions() {
+    return Object.keys(rolePermissions)
+        .map(role => `<option value="${escapeHTML(role)}">${escapeHTML(role)}</option>`)
+        .join("");
+}
+
+function renderAuthMessage(message, className = "auth-message") {
+    return message ? `<p class="${className}" role="status">${escapeHTML(message)}</p>` : "";
+}
+
+function renderSignupPage(message = "") {
     return `
         <div class="login-shell">
-            <div class="login-card">
+            <section class="login-card" aria-labelledby="authTitle">
                 <div class="login-header">
-                    <p class="eyebrow">SECURE ACCESS</p>
-                    <h2>Warehouse management</h2>
+                    <p class="eyebrow">CREATE YOUR WORKSPACE</p>
+                    <h2 id="authTitle">Sign up</h2>
+                    <p>Create an account and choose your role. Your role determines the workspace you see after signing in.</p>
                 </div>
-                <form id="loginForm" class="login-form">
+                ${renderAuthMessage(message)}
+                <p id="authError" class="auth-error" role="alert" hidden></p>
+                <form id="signupForm" class="login-form">
                     <label>
-                        <span>Role</span>
-                        <select name="role" aria-label="Select role">
-                            ${Object.keys(rolePermissions).map(role => `<option value="${escapeHTML(role)}" ${role === authState.role ? "selected" : ""}>${escapeHTML(role)}</option>`).join("")}
+                        <span>Full name</span>
+                        <input name="fullName" type="text" autocomplete="name" minlength="2" maxlength="80" required>
+                    </label>
+                    <label>
+                        <span>Email address</span>
+                        <input name="email" type="email" autocomplete="email" maxlength="255" required>
+                    </label>
+                    <label>
+                        <span>Choose your role</span>
+                        <select name="role" autocomplete="organization-title" required>
+                            <option value="" selected disabled>Select a role</option>
+                            ${renderAccountOptions()}
                         </select>
                     </label>
                     <label>
-                        <span>Username</span>
-                        <input name="username" type="text" value="warehouse.staff" aria-label="Username" required>
+                        <span>Password</span>
+                        <input name="password" type="password" autocomplete="new-password" minlength="8" required>
+                    </label>
+                    <label>
+                        <span>Confirm password</span>
+                        <input name="password_confirmation" type="password" autocomplete="new-password" minlength="8" required>
+                    </label>
+                    <button type="submit" class="primary-button login-button">Create account</button>
+                </form>
+                <p class="auth-switch">Already have an account? <button type="button" data-auth-mode="login">Sign in</button></p>
+                <p class="auth-storage-note">Your account and role are saved in the warehouse database.</p>
+            </section>
+        </div>
+    `;
+}
+
+function renderLoginPage(message = "", email = "") {
+    return `
+        <div class="login-shell">
+            <section class="login-card" aria-labelledby="authTitle">
+                <div class="login-header">
+                    <p class="eyebrow">SECURE ACCESS</p>
+                    <h2 id="authTitle">Welcome back</h2>
+                    <p>Sign in to continue to your assigned role workspace.</p>
+                </div>
+                ${renderAuthMessage(message)}
+                <p id="authError" class="auth-error" role="alert" hidden></p>
+                <form id="loginForm" class="login-form">
+                    <label>
+                        <span>Email address</span>
+                        <input name="email" type="email" value="${escapeHTML(email)}" autocomplete="email" required>
                     </label>
                     <label>
                         <span>Password</span>
-                        <input name="password" type="password" value="password123" aria-label="Password" required>
+                        <input name="password" type="password" autocomplete="current-password" required>
                     </label>
                     <button type="submit" class="primary-button login-button">Sign in</button>
                 </form>
-            </div>
+                <p class="auth-switch">New to the workspace? <button type="button" data-auth-mode="signup">Create an account</button></p>
+                <p class="auth-storage-note">Sign in with the email and password saved to your warehouse account.</p>
+            </section>
         </div>
     `;
+}
+
+function showAuthError(message) {
+    const errorMessage = document.getElementById("authError");
+
+    if (errorMessage) {
+        errorMessage.textContent = message;
+        errorMessage.hidden = false;
+    }
+}
+
+function showAuthMode(mode, message = "", email = "") {
+    appView.innerHTML = mode === "signup"
+        ? renderSignupPage(message)
+        : renderLoginPage(message, email);
+    const authMessage = appView.querySelector(".auth-message");
+
+    if (authMessage) {
+        authMessage.id = "authMessage";
+    }
+
+    pageTitle.textContent = mode === "signup" ? "Create account" : "Sign in";
+    pageSubtitle.textContent = "Warehouse Management";
+    document.title = `${mode === "signup" ? "Sign up" : "Sign in"} | Warehouse Management`;
 }
 
 function applyAuthState() {
@@ -602,42 +757,90 @@ function applyAuthState() {
 
     sidebar.hidden = !authState.isAuthenticated;
     topbar.hidden = !authState.isAuthenticated;
+    document.body.classList.toggle("authenticated", authState.isAuthenticated);
     modalLayer.hidden = true;
     document.body.classList.remove("modal-open");
 
     syncProfile();
 
     if (!authState.isAuthenticated) {
-        pageTitle.textContent = "Warehouse Access";
-        pageSubtitle.textContent = "Sign in to continue.";
-        appView.innerHTML = renderLoginPage();
+        const mode = authState.hasAccounts ? "login" : "signup";
+        showAuthMode(mode);
         return;
     }
 
-    pageTitle.textContent = pageMetadata.dashboard.title;
-    pageSubtitle.textContent = pageMetadata.dashboard.subtitle;
+    pageTitle.textContent = `${authState.role}`;
+    pageSubtitle.textContent = `Role workspace for ${authState.role}.`;
+    document.title = `${authState.role} | Warehouse Management`;
 }
 
-function loginUser(event) {
+async function sendAuthRequest(endpoint, data) {
+    const response = await fetch(endpoint, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": csrfToken,
+        },
+        body: JSON.stringify(data),
+    });
+    const payload = await response.json();
+
+    if (!response.ok) {
+        const validationMessage = Object.values(payload.errors || {}).flat()[0];
+        throw new Error(validationMessage || payload.message || `The request failed (${response.status}).`);
+    }
+
+    return payload;
+}
+
+async function registerAccount(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const selectedRole = String(formData.get("role") || authState.role);
+    const name = String(formData.get("fullName") || "").trim();
+    const email = String(formData.get("email") || "").trim().toLowerCase();
+    const role = String(formData.get("role") || "");
+    const password = String(formData.get("password") || "");
+    const passwordConfirmation = String(formData.get("password_confirmation") || "");
+    const payload = await sendAuthRequest("/warehouse/auth/register", {
+        name,
+        email,
+        role,
+        password,
+        password_confirmation: passwordConfirmation,
+    });
 
-    authState.role = selectedRole;
+    authState.hasAccounts = true;
+    showAuthMode("login", payload.message, email);
+}
+
+async function loginUser(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const email = String(formData.get("email") || "").trim().toLowerCase();
+    const password = String(formData.get("password") || "");
+    const payload = await sendAuthRequest("/warehouse/auth/login", { email, password });
+
+    csrfToken = payload.csrfToken;
+    authState.role = payload.user.role;
+    authState.email = payload.user.email;
+    authState.fullName = payload.user.name;
     authState.isAuthenticated = true;
-    localStorage.setItem("warehouse-auth", "true");
-    localStorage.setItem("warehouse-role", selectedRole);
+    authState.hasAccounts = true;
 
     window.location.hash = "dashboard";
     applyAuthState();
     handlePageChange();
 }
 
-function logoutUser() {
+async function logoutUser() {
+    const payload = await sendAuthRequest("/warehouse/auth/logout", {});
+    csrfToken = payload.csrfToken;
     authState.isAuthenticated = false;
     authState.role = "Warehouse Staff";
-    localStorage.removeItem("warehouse-auth");
-    localStorage.removeItem("warehouse-role");
+    authState.email = "";
+    authState.fullName = "";
     window.location.hash = "";
     applyAuthState();
 }
@@ -811,6 +1014,7 @@ function renderDashboard() {
     const quickActions = getRoleQuickActions(authState.role);
     const operationalQueue = getRoleOperationalQueue(authState.role);
     const dockSchedule = getWarehouseDockSchedule(authState.role);
+    const zoneOverview = getWarehouseZoneOverview(authState.role);
     const insights = getRoleInsights(authState.role);
     const recentActivity = getRecentActivity(authState.role);
 
@@ -946,6 +1150,27 @@ function renderDashboard() {
                         </div>
                         <span class="dock-time">${escapeHTML(item.eta)}</span>
                         <span class="dock-status ${item.status.toLowerCase().replace(/\s+/g, "-")}">${escapeHTML(item.status)}</span>
+                    </div>
+                `).join("")}
+            </div>
+        </section>
+
+        <section class="panel zone-overview-panel">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">ZONE OVERVIEW</p>
+                    <h2>Warehouse capacity</h2>
+                </div>
+            </div>
+            <div class="zone-list">
+                ${zoneOverview.map(zone => `
+                    <div class="zone-item">
+                        <div>
+                            <strong>${escapeHTML(zone.zone)}</strong>
+                            <small>${escapeHTML(zone.detail)}</small>
+                        </div>
+                        <span class="zone-usage">${escapeHTML(zone.usage)}</span>
+                        <span class="zone-status ${zone.status.toLowerCase().replace(/\s+/g, "-")}">${escapeHTML(zone.status)}</span>
                     </div>
                 `).join("")}
             </div>
@@ -1391,22 +1616,6 @@ function renderEmptyState(title, description) {
     return `<div class="empty-state"><span class="empty-icon">✓</span><strong>${title}</strong><p>${description}</p></div>`;
 }
 
-function bindRoleSwitcher() {
-    const roleSwitcher = document.getElementById("roleSwitcher");
-
-    if (!roleSwitcher) {
-        return;
-    }
-
-    roleSwitcher.onchange = event => {
-        const selectedRole = String(event.target.value || "Warehouse Staff");
-        authState.role = selectedRole;
-        localStorage.setItem("warehouse-role", selectedRole);
-        syncProfile();
-        renderPage(getAllowedPages().includes(currentPage) ? currentPage : "dashboard");
-    };
-}
-
 function renderSettings() {
     const roleAccess = rolePermissions[authState.role] || [];
 
@@ -1414,15 +1623,9 @@ function renderSettings() {
         <section class="panel settings-panel">
             <p class="eyebrow">STAFF WORKSPACE</p>
             <h2>Workspace settings</h2>
-            <p>You're signed in as ${escapeHTML(authState.role)}. This sample module stores inventory and alert changes in this browser session only.</p>
+            <p>You're signed in as ${escapeHTML(authState.role)}. This sample module stores accounts and inventory in this browser only.</p>
 
-            <label class="settings-field" for="roleSwitcher">
-                <span>Current role</span>
-                <select id="roleSwitcher" class="role-switcher" aria-label="Select role">
-                    ${Object.keys(rolePermissions).map(role => `<option value="${escapeHTML(role)}" ${role === authState.role ? "selected" : ""}>${escapeHTML(role)}</option>`).join("")}
-                </select>
-            </label>
-
+            <div class="settings-row"><span>Assigned role</span><strong>${escapeHTML(authState.role)}</strong></div>
             <div class="settings-row"><span>Inventory records</span><strong>${inventory.length} sample batches</strong></div>
             <div class="settings-row"><span>Alert window</span><strong>30 days before expiration</strong></div>
             <div class="settings-row"><span>Inventory aging threshold</span><strong>More than 30 days</strong></div>
@@ -1442,9 +1645,14 @@ function renderPage(page) {
 
     currentPage = safePage;
     const metadata = pageMetadata[safePage] || pageMetadata.dashboard;
-    pageTitle.textContent = metadata.title;
-    pageSubtitle.textContent = metadata.subtitle;
-    document.title = `${metadata.title} | Warehouse Management`;
+    const roleHeader = safePage === "dashboard" ? `${authState.role}` : `${authState.role} · ${metadata.title}`;
+    const roleSubtitle = safePage === "dashboard"
+        ? `Role workspace for ${authState.role}.`
+        : `${metadata.subtitle}`;
+
+    pageTitle.textContent = roleHeader;
+    pageSubtitle.textContent = roleSubtitle;
+    document.title = `${authState.role} | ${metadata.title} | Warehouse Management`;
 
     document.querySelectorAll("[data-page]").forEach(link => {
         const isActive = link.dataset.page === safePage;
@@ -1467,7 +1675,6 @@ function renderPage(page) {
         appView.innerHTML = renderAlertsPage();
     } else if (safePage === "settings") {
         appView.innerHTML = renderSettings();
-        bindRoleSwitcher();
     } else {
         appView.innerHTML = renderDashboard();
         showToast("Sign-out is not connected in this sample module.");
@@ -1563,16 +1770,26 @@ function handlePageChange() {
     const page = requestedPage;
 
     if (page === "logout") {
-        logoutUser();
+        logoutUser().catch(error => showToast(error.message));
         return;
     }
 
     renderPage(pageMetadata[page] ? page : "dashboard");
 }
 
-appView.addEventListener("submit", event => {
-    if (event.target.id === "loginForm") {
-        loginUser(event);
+appView.addEventListener("submit", async event => {
+    if (!["signupForm", "loginForm"].includes(event.target.id)) {
+        return;
+    }
+
+    try {
+        if (event.target.id === "signupForm") {
+            await registerAccount(event);
+        } else {
+            await loginUser(event);
+        }
+    } catch (error) {
+        showAuthError(error instanceof Error ? error.message : "Unable to complete account access. Please try again.");
     }
 });
 
@@ -1590,6 +1807,13 @@ appView.addEventListener("change", event => {
 });
 
 appView.addEventListener("click", event => {
+    const authModeButton = event.target.closest("[data-auth-mode]");
+
+    if (authModeButton) {
+        showAuthMode(authModeButton.dataset.authMode);
+        return;
+    }
+
     const quickAction = event.target.closest(".quick-action");
 
     if (quickAction) {
@@ -1709,7 +1933,7 @@ document.querySelectorAll("[data-page]").forEach(link => {
 
         if (page === "logout") {
             event.preventDefault();
-            logoutUser();
+            logoutUser().catch(error => showToast(error.message));
             return;
         }
 
@@ -1722,8 +1946,52 @@ document.querySelectorAll("[data-page]").forEach(link => {
     });
 });
 
+async function initializeAuthentication() {
+    try {
+        const response = await fetch("/warehouse/auth/session", {
+            credentials: "same-origin",
+            headers: { Accept: "application/json" },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Unable to check the sign-in session (${response.status}).`);
+        }
+
+        const session = await response.json();
+        csrfToken = session.csrfToken;
+        authState.hasAccounts = session.hasAccounts;
+
+        if (session.authenticated) {
+            if (
+                !session.user
+                || typeof session.user.name !== "string"
+                || typeof session.user.email !== "string"
+                || !Object.hasOwn(rolePermissions, session.user.role)
+            ) {
+                throw new Error("The signed-in account has invalid role data. Contact the system administrator.");
+            }
+
+            authState.isAuthenticated = true;
+            authState.role = session.user.role;
+            authState.email = session.user.email;
+            authState.fullName = session.user.name;
+        }
+
+        applyAuthState();
+
+        if (authState.isAuthenticated) {
+            handlePageChange();
+        }
+    } catch (error) {
+        authState.isAuthenticated = false;
+        applyAuthState();
+        showAuthMode(
+            "login",
+            error instanceof Error ? error.message : "Unable to connect to the warehouse authentication service.",
+        );
+    }
+}
+
 window.addEventListener("hashchange", handlePageChange);
 applyAuthState();
-if (authState.isAuthenticated) {
-    handlePageChange();
-}
+initializeAuthentication();

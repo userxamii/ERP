@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\WarehouseAuthController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -19,6 +20,13 @@ Route::prefix('product-monitor')->group(function () {
             'Content-Type' => 'text/javascript; charset=UTF-8',
         ]);
     });
+});
+
+Route::prefix('warehouse/auth')->name('warehouse.auth.')->group(function () {
+    Route::get('session', [WarehouseAuthController::class, 'session'])->name('session');
+    Route::post('register', [WarehouseAuthController::class, 'register'])->middleware('guest')->name('register');
+    Route::post('login', [WarehouseAuthController::class, 'login'])->middleware('guest')->name('login');
+    Route::post('logout', [WarehouseAuthController::class, 'logout'])->middleware('auth')->name('logout');
 });
 
 Route::middleware(['auth'])->group(function () {
