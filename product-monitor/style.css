@@ -41,12 +41,6 @@ body[data-role="Production Staff"] {
     --role-accent-soft: #f1f2f4;
 }
 
-body[data-role="Sales & Distribution Staff"] {
-    --role-accent: #4a4d52;
-    --role-accent-strong: #202428;
-    --role-accent-soft: #f0f2f4;
-}
-
 body[data-role="Quality Assurance (QA)"] {
     --role-accent: #555a60;
     --role-accent-strong: #2a2d31;
@@ -1910,6 +1904,11 @@ body:not(.authenticated) .page-content {
     border-color: #cbd7e8;
     background: #f8faff;
     color: var(--blue);
+}
+
+.table-action:disabled {
+    cursor: default;
+    opacity: 0.68;
 }
 
 .table-action.primary-action,
