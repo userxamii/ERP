@@ -541,6 +541,7 @@ const authState = {
     email: "",
     fullName: "",
 };
+window.authState = authState;
 
 let csrfToken = "";
 const readAlertIds = new Set();
@@ -553,6 +554,9 @@ const toast = document.getElementById("toast");
 let toastTimeout;
 let returnFocusElement = null;
 let currentPage = "dashboard";
+window.setCurrentPage = page => {
+    currentPage = page;
+};
 
 function getAllowedPages() {
     return rolePermissions[authState.role] || ["dashboard"];
@@ -2159,5 +2163,3 @@ async function initializeAuthentication() {
 }
 
 window.addEventListener("hashchange", handlePageChange);
-applyAuthState();
-initializeAuthentication();

@@ -30,12 +30,18 @@ function applyScreenRouting() {
     }
 
     window.renderPage = function renderPage(page) {
+        window.setCurrentPage(page);
         const handler = pageHandlers[page] || pageHandlers.dashboard;
         const content = handler();
         const target = window.appView || document.getElementById('appView');
 
         if (target && typeof content === 'string') {
             target.innerHTML = content;
+
+            if (['inventory', 'aging', 'expiring'].includes(page)) {
+                window.renderInventoryRows(page);
+            }
+
             return;
         }
 
@@ -74,4 +80,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     applyScreenRouting();
+    window.applyAuthState();
+    window.initializeAuthentication();
 });
