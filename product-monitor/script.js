@@ -540,7 +540,7 @@ function getRecentActivity(role) {
 
 const roleTheme = {
     "Warehouse Staff": { accent: "#1e2024", accentStrong: "#0b0d10", accentSoft: "#f3f4f6" },
-    "Procurement Staff": { accent: "#2a2d31", accentStrong: "#17191d", accentSoft: "#eef0f3" },
+    "Procurement Staff": { accent: "#1d4ed8", accentStrong: "#1e3a8a", accentSoft: "#eff6ff" },
     "Production Staff": { accent: "#3b3f45", accentStrong: "#1d2126", accentSoft: "#f0f2f4" },
     "Sales & Distribution Staff": { accent: "#4b4f54", accentStrong: "#252a2e", accentSoft: "#f0f1f3" },
     "Quality Assurance (QA)": { accent: "#5a5d61", accentStrong: "#2a2d31", accentSoft: "#f2f3f5" },
@@ -994,6 +994,234 @@ function renderStatCard(label, value, note, color, icon) {
     `;
 }
 
+function isUsableForProcurement(product) {
+    return !["Expired", "Damaged"].includes(product.status) && getDaysRemaining(product) >= 0;
+}
+
+function getProcurementExpirationRisks() {
+    return inventory
+        .map(product => {
+            const daysRemaining = getDaysRemaining(product);
+            const isExpired = daysRemaining < 0 || product.status === "Expired";
+
+            if (!isExpired && daysRemaining > 30) {
+                return null;
+            }
+
+            const priority = isExpired ? "Critical" : daysRemaining <= 7 ? "High" : "Medium";
+            const nextAction = isExpired
+                ? "Do not reorder from this signal. Coordinate disposition with QA and Warehouse."
+                : "Confirm planned use before adding supply; use the earliest-expiring eligible batch first.";
+
+            return {
+                product,
+                daysRemaining,
+                priority,
+                nextAction,
+            };
+        })
+        .filter(Boolean)
+        .sort((first, second) => {
+            const priorityOrder = { Critical: 0, High: 1, Medium: 2 };
+            const priorityDifference = priorityOrder[first.priority] - priorityOrder[second.priority];
+
+            return priorityDifference || first.daysRemaining - second.daysRemaining;
+        });
+}
+
+function renderProcurementMetric({ label, value, detail, state, icon }) {
+    return `
+        <article class="procurement-metric-card">
+            <span class="procurement-metric-icon ${escapeHTML(state)}">${icon}</span>
+            <span class="procurement-metric-copy">
+                <span>${escapeHTML(label)}</span>
+                <strong>${escapeHTML(value)}</strong>
+                <small>${escapeHTML(detail)}</small>
+            </span>
+        </article>
+    `;
+}
+
+function renderProcurementPriority(risk) {
+    const { product, daysRemaining, priority, nextAction } = risk;
+
+    return `
+        <article class="procurement-priority-row">
+            <span class="procurement-priority-icon ${getPriorityClass(priority)}">${renderAlertIcon(daysRemaining < 0 || product.status === "Expired" ? "expired" : "expiration")}</span>
+            <div class="procurement-priority-copy">
+                <div class="procurement-priority-title">
+                    <strong>${escapeHTML(product.name)}</strong>
+                    <span class="mono">${escapeHTML(product.batch)}</span>
+                    <span class="priority-tag ${getPriorityClass(priority)}">${escapeHTML(priority)}</span>
+                </div>
+                <p>${escapeHTML(nextAction)}</p>
+                <small>${product.quantity} units on hand · ${escapeHTML(getExpiryLabel(daysRemaining))}</small>
+            </div>
+            <button class="table-action" type="button" data-action="details" data-product-id="${escapeHTML(product.id)}">Review risk</button>
+        </article>
+    `;
+}
+
+function renderProcurementDashboard() {
+    const expirationRisks = getProcurementExpirationRisks();
+    const usableBatches = inventory.filter(isUsableForProcurement);
+    const expiredOrDamagedBatches = inventory.filter(product => !isUsableForProcurement(product));
+    const usableUnits = usableBatches.reduce((total, product) => total + product.quantity, 0);
+    const unavailableUnits = expiredOrDamagedBatches.reduce((total, product) => total + product.quantity, 0);
+    const priorityRisks = expirationRisks.slice(0, 4);
+    const calendarIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>';
+    const inventoryIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4.3 7.7 7.7 4.4 7.7-4.4M12 12v9M8 5.2l8 4.6"/></svg>';
+    const signalIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12"/><path d="M5.5 17.5 12 21l6.5-3.5"/><path d="M5.5 9.5 12 13l6.5-3.5"/></svg>';
+
+    return `
+        <section class="procurement-briefing" aria-labelledby="procurementDashboardTitle">
+            <div>
+                <p class="eyebrow">WAREHOUSE OPERATIONS · PROCUREMENT</p>
+                <h2 id="procurementDashboardTitle">Procurement priorities</h2>
+                <p>Monitor material risk before initiating replenishment. The current prototype has batch-level inventory only, so purchasing signals are shown only where the data supports them.</p>
+            </div>
+            <div class="procurement-briefing-meta">
+                <span>Inventory snapshot</span>
+                <strong>${getDateLabel(todayString())}</strong>
+                <small>Prototype data</small>
+            </div>
+        </section>
+
+        <section class="procurement-metric-grid" aria-label="Procurement overview">
+            ${renderProcurementMetric({
+                label: "Expiration-related risks",
+                value: String(expirationRisks.length),
+                detail: "Batches expiring within 30 days or expired",
+                state: "risk",
+                icon: calendarIcon,
+            })}
+            ${renderProcurementMetric({
+                label: "Usable inventory",
+                value: `${usableUnits} units`,
+                detail: `${unavailableUnits} units in ${expiredOrDamagedBatches.length} expired or damaged batches excluded`,
+                state: "healthy",
+                icon: inventoryIcon,
+            })}
+            ${renderProcurementMetric({
+                label: "Replenishment signal",
+                value: "Unavailable",
+                detail: "Minimum stock, reservations, and inbound orders are not recorded",
+                state: "unavailable",
+                icon: signalIcon,
+            })}
+        </section>
+
+        <section class="panel procurement-priorities-panel" aria-labelledby="procurementPrioritiesTitle">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">NEEDS ATTENTION</p>
+                    <h2 id="procurementPrioritiesTitle">Procurement Priorities</h2>
+                    <p class="panel-description">Act on expiry exposure first; do not treat an aging or expiring batch as an automatic reorder request.</p>
+                </div>
+                <a class="text-link" href="#alerts">Open alerts <span aria-hidden="true">→</span></a>
+            </div>
+            ${priorityRisks.length > 0
+                ? `<div class="procurement-priority-list">${priorityRisks.map(renderProcurementPriority).join("")}</div>`
+                : renderEmptyState("No current expiry risks", "No tracked batches are expired or within the configured 30-day warning window.")}
+        </section>
+
+        <section class="procurement-workspace-grid" aria-label="Procurement work areas">
+            <article class="panel procurement-data-panel">
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">MATERIAL REQUIREMENTS</p>
+                        <h2>Material Replenishment</h2>
+                    </div>
+                </div>
+                <div class="procurement-empty-state">
+                    <span class="procurement-empty-icon">${signalIcon}</span>
+                    <div>
+                        <strong>Replenishment cannot be calculated yet</strong>
+                        <p>Minimum stock levels, production reservations, material categories, and outstanding inbound quantities are not present in the current dataset.</p>
+                    </div>
+                    <a class="table-action" href="#inventory">Review tracked inventory</a>
+                </div>
+            </article>
+
+            <article class="panel procurement-data-panel">
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">PURCHASING WORKFLOW</p>
+                        <h2>Purchase Requests &amp; Orders</h2>
+                    </div>
+                </div>
+                <div class="procurement-empty-state">
+                    <span class="procurement-empty-icon">${inventoryIcon}</span>
+                    <div>
+                        <strong>No purchase workflow records available</strong>
+                        <p>Purchase requests, purchase orders, suppliers, approval status, and priorities have not been modelled in this prototype.</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="panel procurement-data-panel">
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">INBOUND MONITORING</p>
+                        <h2>Expected Deliveries</h2>
+                    </div>
+                </div>
+                <div class="procurement-empty-state">
+                    <span class="procurement-empty-icon">${calendarIcon}</span>
+                    <div>
+                        <strong>No supplier delivery records available</strong>
+                        <p>Expected dates, receipt quantities, actual delivery dates, and delivery status are required before overdue or due-soon delivery monitoring can be shown.</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="panel procurement-data-panel">
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">ACTIVITY HISTORY</p>
+                        <h2>Recent Procurement Activity</h2>
+                    </div>
+                </div>
+                <div class="procurement-empty-state">
+                    <span class="procurement-empty-icon">${calendarIcon}</span>
+                    <div>
+                        <strong>Activity history is not available</strong>
+                        <p>This prototype does not store procurement events, so no activity feed is displayed as though it were an audit record.</p>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <section class="panel procurement-risk-panel" aria-labelledby="expirationRiskTitle">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">EXPIRATION &amp; OVERSTOCK RISKS</p>
+                    <h2 id="expirationRiskTitle">Tracked batch risk</h2>
+                    <p class="panel-description">Derived from each batch’s received date, expiration date, quantity, and current status. FEFO is recommended only for eligible stock.</p>
+                </div>
+            </div>
+            ${expirationRisks.length > 0
+                ? `<div class="table-wrap"><table class="data-table procurement-risk-table">
+                    <thead><tr><th>Material</th><th>Batch</th><th>Quantity</th><th>Inventory age</th><th>Expiration</th><th>Risk</th><th>Recommended follow-up</th><th>Action</th></tr></thead>
+                    <tbody>${expirationRisks.map(({ product, daysRemaining, priority, nextAction }) => `
+                        <tr>
+                            <td>${renderProductName(product)}</td>
+                            <td class="mono">${escapeHTML(product.batch)}</td>
+                            <td><strong class="quantity">${product.quantity}</strong><span class="unit-label"> units</span></td>
+                            <td>${renderAgeBadge(getInventoryAge(product))}</td>
+                            <td><span class="expiry-badge ${daysRemaining < 0 || product.status === "Expired" ? "expired" : daysRemaining <= 7 ? "urgent" : "soon"}">${escapeHTML(getExpiryLabel(daysRemaining))}</span></td>
+                            <td><span class="priority-tag ${getPriorityClass(priority)}">${escapeHTML(priority)}</span></td>
+                            <td><span class="procurement-follow-up">${escapeHTML(nextAction)}</span></td>
+                            <td><button class="table-action" type="button" data-action="details" data-product-id="${escapeHTML(product.id)}">Review risk</button></td>
+                        </tr>
+                    `).join("")}</tbody>
+                </table></div>`
+                : renderEmptyState("No tracked batch risks", "Expiration risk will appear here when a batch reaches the 30-day warning window or is expired.")}
+            <p class="procurement-source-note"><strong>Data note:</strong> usable stock excludes expired and damaged batches. Low-stock, shortage, purchase request, purchase order, supplier, and delivery metrics are intentionally withheld until those records exist.</p>
+        </section>
+    `;
+}
+
 function renderDashboard() {
     const totalUnits = inventory.reduce((total, product) => total + product.quantity, 0);
     const agingCount = inventory.filter(product => (
@@ -1432,7 +1660,7 @@ function renderInventoryRows(page) {
                 <td>
                     <div class="row-actions">
                         <button class="table-action" type="button" data-action="details" data-product-id="${escapeHTML(product.id)}">Details</button>
-                        <button class="table-action primary-action" type="button" data-action="update-status" data-product-id="${escapeHTML(product.id)}">Update status</button>
+                        ${authState.role === "Procurement Staff" ? "" : `<button class="table-action primary-action" type="button" data-action="update-status" data-product-id="${escapeHTML(product.id)}">Update status</button>`}
                     </div>
                 </td>
             </tr>
@@ -1623,7 +1851,7 @@ function renderSettings() {
         <section class="panel settings-panel">
             <p class="eyebrow">STAFF WORKSPACE</p>
             <h2>Workspace settings</h2>
-            <p>You're signed in as ${escapeHTML(authState.role)}. This sample module stores accounts and inventory in this browser only.</p>
+            <p>You're signed in as ${escapeHTML(authState.role)}. Accounts are saved in the warehouse database; the prototype inventory dataset is held in this browser session.</p>
 
             <div class="settings-row"><span>Assigned role</span><strong>${escapeHTML(authState.role)}</strong></div>
             <div class="settings-row"><span>Inventory records</span><strong>${inventory.length} sample batches</strong></div>
@@ -1645,9 +1873,14 @@ function renderPage(page) {
 
     currentPage = safePage;
     const metadata = pageMetadata[safePage] || pageMetadata.dashboard;
-    const roleHeader = safePage === "dashboard" ? `${authState.role}` : `${authState.role} · ${metadata.title}`;
-    const roleSubtitle = safePage === "dashboard"
-        ? `Role workspace for ${authState.role}.`
+    const isProcurementDashboard = safePage === "dashboard" && authState.role === "Procurement Staff";
+    const roleHeader = isProcurementDashboard
+        ? "Procurement Dashboard"
+        : safePage === "dashboard" ? `${authState.role}` : `${authState.role} · ${metadata.title}`;
+    const roleSubtitle = isProcurementDashboard
+        ? "Monitor replenishment prerequisites, supplier delivery data, and material availability."
+        : safePage === "dashboard"
+            ? `Role workspace for ${authState.role}.`
         : `${metadata.subtitle}`;
 
     pageTitle.textContent = roleHeader;
@@ -1665,7 +1898,7 @@ function renderPage(page) {
     });
 
     if (safePage === "dashboard") {
-        appView.innerHTML = renderDashboard();
+        appView.innerHTML = isProcurementDashboard ? renderProcurementDashboard() : renderDashboard();
     } else if (["inventory", "aging", "expiring"].includes(safePage)) {
         appView.innerHTML = renderTablePage(safePage);
         renderInventoryRows(safePage);
@@ -1722,7 +1955,7 @@ function showProductDetails(product) {
         </div>
         <div class="modal-footer">
             <button class="secondary-button" type="button" data-action="close-modal">Close</button>
-            <button class="primary-button" type="button" data-action="update-from-details" data-product-id="${escapeHTML(product.id)}">Update status</button>
+            ${authState.role === "Procurement Staff" ? "" : `<button class="primary-button" type="button" data-action="update-from-details" data-product-id="${escapeHTML(product.id)}">Update status</button>`}
         </div>
     `);
 }
@@ -1850,6 +2083,11 @@ appView.addEventListener("click", event => {
             showProductDetails(product);
         }
     } else if (action === "update-status") {
+        if (authState.role === "Procurement Staff") {
+            showToast("Procurement Staff can review inventory but cannot update batch status.");
+            return;
+        }
+
         const product = inventory.find(item => item.id === productId);
 
         if (product) {
@@ -1874,6 +2112,11 @@ modalLayer.addEventListener("click", event => {
     const updateFromDetails = event.target.closest('[data-action="update-from-details"]');
 
     if (updateFromDetails) {
+        if (authState.role === "Procurement Staff") {
+            showToast("Procurement Staff can review inventory but cannot update batch status.");
+            return;
+        }
+
         const product = inventory.find(item => item.id === updateFromDetails.dataset.productId);
 
         if (product) {
@@ -1888,6 +2131,13 @@ modalContent.addEventListener("submit", event => {
     }
 
     event.preventDefault();
+
+    if (authState.role === "Procurement Staff") {
+        showToast("Procurement Staff can review inventory but cannot update batch status.");
+        closeModal();
+        return;
+    }
+
     const product = inventory.find(item => item.id === event.target.dataset.productId);
     const newStatus = new FormData(event.target).get("status");
 

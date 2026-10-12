@@ -30,9 +30,9 @@
 }
 
 body[data-role="Procurement Staff"] {
-    --role-accent: #2a2d31;
-    --role-accent-strong: #15181c;
-    --role-accent-soft: #eef1f4;
+    --role-accent: #1d4ed8;
+    --role-accent-strong: #1e3a8a;
+    --role-accent-soft: #eff6ff;
 }
 
 body[data-role="Production Staff"] {
@@ -2836,5 +2836,388 @@ body.modal-open {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+/* Procurement dashboard: scoped so that the other role workspaces retain their existing presentation. */
+body[data-role="Procurement Staff"] .primary-nav a.active,
+body[data-role="Procurement Staff"] .sidebar-footer a.active {
+    border-color: #2563eb;
+    background: #1d4ed8;
+    color: #ffffff;
+}
+
+body[data-role="Procurement Staff"] .primary-nav a:hover,
+body[data-role="Procurement Staff"] .sidebar-footer a:hover {
+    border-color: rgba(96, 165, 250, 0.5);
+    background: rgba(37, 99, 235, 0.2);
+}
+
+body[data-role="Procurement Staff"] .primary-nav a:focus-visible,
+body[data-role="Procurement Staff"] .sidebar-footer a:focus-visible,
+body[data-role="Procurement Staff"] .procurement-priority-row:focus-within,
+body[data-role="Procurement Staff"] .table-action:focus-visible,
+body[data-role="Procurement Staff"] .text-link:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 2px;
+}
+
+.procurement-briefing {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 22px 24px;
+    border: 1px solid #bfdbfe;
+    border-radius: 14px;
+    background: #f8fbff;
+}
+
+.procurement-briefing .eyebrow {
+    margin-bottom: 7px;
+    color: #1d4ed8;
+}
+
+.procurement-briefing h2 {
+    margin: 0;
+    color: #172554;
+    font-size: 21px;
+    font-weight: 720;
+    letter-spacing: -0.45px;
+}
+
+.procurement-briefing > div:first-child > p:last-child {
+    max-width: 760px;
+    margin: 8px 0 0;
+    color: #52637d;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.procurement-briefing-meta {
+    display: grid;
+    min-width: 144px;
+    gap: 3px;
+    padding: 11px 13px;
+    border: 1px solid #dbeafe;
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+.procurement-briefing-meta span,
+.procurement-briefing-meta small {
+    color: #64748b;
+    font-size: 10px;
+}
+
+.procurement-briefing-meta strong {
+    color: #1e3a8a;
+    font-size: 12px;
+}
+
+.procurement-briefing-meta small {
+    color: #2563eb;
+    font-weight: 650;
+}
+
+.procurement-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.procurement-metric-card {
+    display: flex;
+    min-width: 0;
+    min-height: 122px;
+    gap: 13px;
+    padding: 18px;
+    border: 1px solid #dfe7f1;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+.procurement-metric-icon,
+.procurement-priority-icon,
+.procurement-empty-icon {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 10px;
+}
+
+.procurement-metric-icon {
+    width: 40px;
+    height: 40px;
+}
+
+.procurement-metric-icon svg,
+.procurement-priority-icon svg,
+.procurement-empty-icon svg {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+}
+
+.procurement-metric-icon.risk {
+    background: #fff1f2;
+    color: #be123c;
+}
+
+.procurement-metric-icon.healthy {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.procurement-metric-icon.unavailable {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.procurement-metric-copy {
+    display: grid;
+    min-width: 0;
+    align-content: start;
+    gap: 4px;
+}
+
+.procurement-metric-copy > span {
+    color: #52637d;
+    font-size: 11px;
+    font-weight: 620;
+}
+
+.procurement-metric-copy strong {
+    overflow-wrap: anywhere;
+    color: #172554;
+    font-size: 24px;
+    font-weight: 720;
+    letter-spacing: -0.75px;
+    line-height: 1.1;
+}
+
+.procurement-metric-copy small {
+    color: #64748b;
+    font-size: 10px;
+    line-height: 1.45;
+}
+
+.procurement-priorities-panel {
+    padding-bottom: 7px;
+}
+
+.procurement-priority-list {
+    display: grid;
+}
+
+.procurement-priority-row {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 14px 2px;
+    border-top: 1px solid #e9eef5;
+}
+
+.procurement-priority-row:first-child {
+    border-top: 0;
+}
+
+.procurement-priority-icon {
+    width: 36px;
+    height: 36px;
+}
+
+.procurement-priority-icon.critical {
+    background: #fff1f2;
+    color: #be123c;
+}
+
+.procurement-priority-icon.high {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.procurement-priority-icon.medium {
+    background: #fffbeb;
+    color: #a16207;
+}
+
+.procurement-priority-copy {
+    min-width: 0;
+    flex: 1;
+}
+
+.procurement-priority-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.procurement-priority-title strong {
+    color: #1e293b;
+    font-size: 12px;
+}
+
+.procurement-priority-title .mono {
+    color: #64748b !important;
+}
+
+.procurement-priority-title .priority-tag {
+    margin-left: auto;
+}
+
+.procurement-priority-copy p {
+    margin: 5px 0 3px;
+    color: #52637d;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.procurement-priority-copy small {
+    color: #64748b;
+    font-size: 10px;
+}
+
+.procurement-workspace-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.procurement-data-panel {
+    min-height: 184px;
+}
+
+.procurement-data-panel .panel-heading {
+    margin-bottom: 12px;
+}
+
+.procurement-empty-state {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 0 2px;
+}
+
+.procurement-empty-icon {
+    width: 34px;
+    height: 34px;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.procurement-empty-state > div {
+    min-width: 0;
+    flex: 1;
+}
+
+.procurement-empty-state strong {
+    color: #1e293b;
+    font-size: 11px;
+}
+
+.procurement-empty-state p {
+    margin: 5px 0 0;
+    color: #64748b;
+    font-size: 10px;
+    line-height: 1.55;
+}
+
+.procurement-empty-state .table-action {
+    flex: 0 0 auto;
+    color: #1d4ed8;
+    text-decoration: none;
+}
+
+.procurement-risk-table {
+    min-width: 1160px;
+}
+
+.procurement-follow-up {
+    display: inline-block;
+    max-width: 330px;
+    color: #52637d;
+    font-size: 10px;
+    line-height: 1.45;
+    white-space: normal;
+}
+
+.procurement-source-note {
+    margin: 15px 0 0;
+    padding: 11px 12px;
+    border-left: 3px solid #60a5fa;
+    border-radius: 0 8px 8px 0;
+    background: #f8fbff;
+    color: #52637d;
+    font-size: 10px;
+    line-height: 1.55;
+}
+
+.procurement-source-note strong {
+    color: #1e3a8a;
+}
+
+@media (max-width: 960px) {
+    .procurement-metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .procurement-metric-card:last-child {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 680px) {
+    .procurement-briefing {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 14px;
+        padding: 18px;
+    }
+
+    .procurement-briefing-meta {
+        min-width: 0;
+    }
+
+    .procurement-metric-grid,
+    .procurement-workspace-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .procurement-metric-card:last-child {
+        grid-column: auto;
+    }
+
+    .procurement-priority-row {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .procurement-priority-copy {
+        width: calc(100% - 49px);
+        flex: 1 1 calc(100% - 49px);
+    }
+
+    .procurement-priority-row .table-action {
+        width: 100%;
+    }
+
+    .procurement-empty-state {
+        flex-wrap: wrap;
+    }
+
+    .procurement-empty-state > div {
+        width: calc(100% - 46px);
+        flex-basis: calc(100% - 46px);
+    }
+
+    .procurement-empty-state .table-action {
+        width: 100%;
+        text-align: center;
     }
 }

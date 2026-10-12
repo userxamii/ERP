@@ -20,6 +20,12 @@ Route::prefix('product-monitor')->group(function () {
             'Content-Type' => 'text/javascript; charset=UTF-8',
         ]);
     });
+
+    Route::get('main.js', function () {
+        return response()->file(base_path('product-monitor/main.js'), [
+            'Content-Type' => 'text/javascript; charset=UTF-8',
+        ]);
+    });
 });
 
 Route::prefix('warehouse/auth')->name('warehouse.auth.')->group(function () {
