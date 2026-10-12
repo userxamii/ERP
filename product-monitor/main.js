@@ -4,6 +4,9 @@ import { renderOperationsScreen } from './screens/operations.js';
 import { renderAlertsScreen } from './screens/alerts.js';
 import { renderSettingsScreen } from './screens/settings.js';
 import { renderLoginScreen, renderSignupScreen } from './screens/auth.js';
+import { salesDistributionStaff } from './screens/sales-and-distribution-staff.js';
+
+window.salesDistributionStaff = salesDistributionStaff;
 
 const pageHandlers = {
     dashboard: () => {

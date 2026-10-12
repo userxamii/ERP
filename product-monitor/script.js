@@ -99,7 +99,7 @@ const rolePermissions = {
     "Warehouse Staff": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
     "Procurement Staff": ["dashboard", "inventory", "operations", "alerts", "settings"],
     "Production Staff": ["dashboard", "inventory", "operations", "alerts", "settings"],
-    "Sales & Distribution Staff": ["dashboard", "operations", "alerts", "settings"],
+    "Sales & Distribution Staff": ["dashboard", "expiring", "operations", "alerts", "settings"],
     "Quality Assurance (QA)": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
     "Finance Staff": ["dashboard", "operations", "alerts", "settings"],
     "Management": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
@@ -121,11 +121,6 @@ const roleHighlights = {
         "Check usable material availability and batch quality status.",
         "Request materials for planned production orders.",
         "Use FEFO recommendations when selecting eligible stock.",
-    ],
-    "Sales & Distribution Staff": [
-        "Review aggregate material availability and risk summaries.",
-        "Track supply constraints that could affect distribution plans.",
-        "Use read-only visibility to support customer commitments.",
     ],
     "Quality Assurance (QA)": [
         "Inspect incoming batches and capture inspection findings.",
@@ -150,6 +145,10 @@ const roleHighlights = {
 };
 
 function getRoleDashboardCards(role) {
+    if (role === "Sales & Distribution Staff") {
+        return salesDistributionStaff.getDashboardCards();
+    }
+
     const totalInStock = inventory.reduce((sum, product) => sum + product.quantity, 0);
     const lowStock = inventory.filter(product => product.quantity < 40).length;
     const agingItems = inventory.filter(product => getInventoryAge(product) > 30 && getDaysRemaining(product) >= 0 && product.status !== "Expired").length;
@@ -170,11 +169,6 @@ function getRoleDashboardCards(role) {
             { label: "Available units", value: totalInStock.toLocaleString(), note: "Usable stock", color: "blue" },
             { label: "Ready batches", value: "5", note: "QA cleared", color: "green" },
             { label: "FEFO queue", value: expiringSoon, note: "Next expiry review", color: "amber" },
-        ],
-        "Sales & Distribution Staff": [
-            { label: "Available supply", value: totalInStock.toLocaleString(), note: "Units available", color: "blue" },
-            { label: "Supply risk", value: "2 items", note: "Potential constraints", color: "orange" },
-            { label: "Distribution plan", value: "6 orders", note: "Current visibility", color: "green" },
         ],
         "Quality Assurance (QA)": [
             { label: "Pending inspection", value: "3 batches", note: "Queue", color: "orange" },
@@ -202,6 +196,10 @@ function getRoleDashboardCards(role) {
 }
 
 function getRoleQuickActions(role) {
+    if (role === "Sales & Distribution Staff") {
+        return salesDistributionStaff.quickActions;
+    }
+
     const roleMap = {
         "Warehouse Staff": [
             { label: "Operations board", page: "operations" },
@@ -220,12 +218,6 @@ function getRoleQuickActions(role) {
             { label: "Check stock", page: "inventory" },
             { label: "View expiries", page: "expiring" },
             { label: "Open alerts", page: "alerts" },
-        ],
-        "Sales & Distribution Staff": [
-            { label: "Operations board", page: "operations" },
-            { label: "Supply summary", page: "dashboard" },
-            { label: "Alert center", page: "alerts" },
-            { label: "Inventory view", page: "inventory" },
         ],
         "Quality Assurance (QA)": [
             { label: "Operations board", page: "operations" },
@@ -257,6 +249,10 @@ function getRoleQuickActions(role) {
 }
 
 function getRoleOperationalQueue(role) {
+    if (role === "Sales & Distribution Staff") {
+        return salesDistributionStaff.operationalQueue;
+    }
+
     const roleMap = {
         "Warehouse Staff": [
             { title: "Receive 3 inbound batches", status: "Pending", detail: "Prioritize materials stored in Zone B" },
@@ -272,11 +268,6 @@ function getRoleOperationalQueue(role) {
             { title: "Plan material release", status: "Priority", detail: "Need QA-cleared stock for line 3" },
             { title: "Review FEFO queue", status: "Pending", detail: "Two lots approaching expiration" },
             { title: "Confirm production schedule", status: "Ready", detail: "Shift handoff complete" },
-        ],
-        "Sales & Distribution Staff": [
-            { title: "Confirm outbound capacity", status: "Pending", detail: "Check stock for 6 active orders" },
-            { title: "Flag supply risk", status: "Watch", detail: "One route impacted by aging stock" },
-            { title: "Review dispatch window", status: "Ready", detail: "No major shipping constraints" },
         ],
         "Quality Assurance (QA)": [
             { title: "QA sample review", status: "Pending", detail: "Three incoming lots need inspection" },
@@ -304,6 +295,10 @@ function getRoleOperationalQueue(role) {
 }
 
 function getRoleOperationsTimeline(role) {
+    if (role === "Sales & Distribution Staff") {
+        return salesDistributionStaff.timeline;
+    }
+
     const roleMap = {
         "Warehouse Staff": [
             { time: "08:30", title: "Inbound receiving", note: "Three batches cleared for put-away approval." },
@@ -319,11 +314,6 @@ function getRoleOperationsTimeline(role) {
             { time: "07:45", title: "Line readiness", note: "Line 3 confirms materials are available for the next run." },
             { time: "12:30", title: "FEFO release", note: "Two material lots prepared for the afternoon schedule." },
             { time: "15:10", title: "Quality handoff", note: "QA-cleared stock queued for final issue release." },
-        ],
-        "Sales & Distribution Staff": [
-            { time: "08:50", title: "Dispatch window", note: "Outbound plan refreshed for the next customer cycle." },
-            { time: "12:05", title: "Capacity check", note: "Transport slots remain stable for active orders." },
-            { time: "17:15", title: "Risk update", note: "One route remains under supply watch due to aging stock." },
         ],
         "Quality Assurance (QA)": [
             { time: "09:00", title: "Batch inspection", note: "Three inbound lots await final signoff." },
@@ -351,6 +341,10 @@ function getRoleOperationsTimeline(role) {
 }
 
 function getWarehouseDockSchedule(role) {
+    if (role === "Sales & Distribution Staff") {
+        return salesDistributionStaff.dockSchedule;
+    }
+
     const roleMap = {
         "Warehouse Staff": [
             { label: "Inbound arrival", zone: "Dock 4", eta: "08:45", status: "Receiving" },
@@ -366,11 +360,6 @@ function getWarehouseDockSchedule(role) {
             { label: "Line 3 material run", zone: "Zone C", eta: "08:30", status: "Ready" },
             { label: "FEFO issue", zone: "Zone A", eta: "12:10", status: "In progress" },
             { label: "Load-out handoff", zone: "Dock 5", eta: "16:00", status: "Queued" },
-        ],
-        "Sales & Distribution Staff": [
-            { label: "Customer dispatch", zone: "Dock 1", eta: "10:40", status: "Queued" },
-            { label: "Cold chain release", zone: "Zone K", eta: "14:50", status: "Ready" },
-            { label: "Return transfer", zone: "Dock 2", eta: "18:10", status: "Review" },
         ],
         "Quality Assurance (QA)": [
             { label: "Sample inspection", zone: "QA bay", eta: "09:25", status: "Pending" },
@@ -398,6 +387,10 @@ function getWarehouseDockSchedule(role) {
 }
 
 function getWarehouseZoneOverview(role) {
+    if (role === "Sales & Distribution Staff") {
+        return salesDistributionStaff.zoneOverview;
+    }
+
     const roleMap = {
         "Warehouse Staff": [
             { zone: "Zone A", usage: "72%", status: "Stable", detail: "4 pallets awaiting pick review" },
@@ -413,11 +406,6 @@ function getWarehouseZoneOverview(role) {
             { zone: "Line 3", usage: "76%", status: "Busy", detail: "Material issue is scheduled" },
             { zone: "Zone A", usage: "69%", status: "Stable", detail: "FEFO batches queued" },
             { zone: "Zone C", usage: "51%", status: "Healthy", detail: "Reserve stock comfortable" },
-        ],
-        "Sales & Distribution Staff": [
-            { zone: "Outbound", usage: "70%", status: "Stable", detail: "Dispatch window still open" },
-            { zone: "Cold Chain", usage: "59%", status: "Healthy", detail: "Condition-controlled stock available" },
-            { zone: "Dock 1", usage: "82%", status: "Busy", detail: "Pickup cycle in progress" },
         ],
         "Quality Assurance (QA)": [
             { zone: "QA Bay", usage: "66%", status: "Busy", detail: "Sample checks active" },
@@ -445,6 +433,10 @@ function getWarehouseZoneOverview(role) {
 }
 
 function getRoleInsights(role) {
+    if (role === "Sales & Distribution Staff") {
+        return salesDistributionStaff.insights;
+    }
+
     const roleMap = {
         "Warehouse Staff": [
             "Cycle counts are on pace for the week.",
@@ -460,11 +452,6 @@ function getRoleInsights(role) {
             "Production line demand is stable across shifts.",
             "FEFO queue is manageable with current release plans.",
             "Material release timing matches weekly schedule.",
-        ],
-        "Sales & Distribution Staff": [
-            "Outbound dispatch is aligned to current demand.",
-            "One route is exposed to supply risk from aging stock.",
-            "Customer orders remain within stock availability limits.",
         ],
         "Quality Assurance (QA)": [
             "Inspection backlog is trending down this week.",
@@ -492,6 +479,10 @@ function getRoleInsights(role) {
 }
 
 function getRecentActivity(role) {
+    if (role === "Sales & Distribution Staff") {
+        return salesDistributionStaff.recentActivity;
+    }
+
     const roleMap = {
         "Warehouse Staff": [
             "Cycle count completed in Zone A",
@@ -507,11 +498,6 @@ function getRecentActivity(role) {
             "Material release approved for Line 3",
             "FEFO queue refreshed for this shift",
             "Production handoff completed at 14:00",
-        ],
-        "Sales & Distribution Staff": [
-            "Dispatch plan refreshed for active orders",
-            "Outbound stock reservation updated",
-            "Risk flag shared with fulfillment team",
         ],
         "Quality Assurance (QA)": [
             "QA hold released for approved batch",
@@ -542,7 +528,6 @@ const roleTheme = {
     "Warehouse Staff": { accent: "#1e2024", accentStrong: "#0b0d10", accentSoft: "#f3f4f6" },
     "Procurement Staff": { accent: "#1d4ed8", accentStrong: "#1e3a8a", accentSoft: "#eff6ff" },
     "Production Staff": { accent: "#3b3f45", accentStrong: "#1d2126", accentSoft: "#f0f2f4" },
-    "Sales & Distribution Staff": { accent: "#4b4f54", accentStrong: "#252a2e", accentSoft: "#f0f1f3" },
     "Quality Assurance (QA)": { accent: "#5a5d61", accentStrong: "#2a2d31", accentSoft: "#f2f3f5" },
     "Finance Staff": { accent: "#4c4f53", accentStrong: "#1d1f22", accentSoft: "#eef1f4" },
     Management: { accent: "#2a2d31", accentStrong: "#101214", accentSoft: "#f4f5f6" },
@@ -585,7 +570,9 @@ function getRoleInitials(role) {
 }
 
 function applyRoleTheme() {
-    const theme = roleTheme[authState.role] || roleTheme["Warehouse Staff"];
+    const theme = authState.role === "Sales & Distribution Staff"
+        ? salesDistributionStaff.theme
+        : roleTheme[authState.role] || roleTheme["Warehouse Staff"];
     const root = document.documentElement;
 
     root.style.setProperty("--role-accent", theme.accent);
@@ -625,11 +612,7 @@ function syncProfile() {
         profileSmall.textContent = authState.isAuthenticated ? authState.role : "Inventory team";
     }
 
-    sidebarAvatars.forEach(element => {
-        element.textContent = accountInitials;
-    });
-
-    profileAvatars.forEach(element => {
+    [...sidebarAvatars, ...profileAvatars].forEach(element => {
         element.textContent = accountInitials;
     });
 
@@ -638,89 +621,6 @@ function syncProfile() {
         const isVisible = page === "logout" || getAllowedPages().includes(page);
         link.hidden = !isVisible;
     });
-}
-
-function renderAccountOptions() {
-    return Object.keys(rolePermissions)
-        .map(role => `<option value="${escapeHTML(role)}">${escapeHTML(role)}</option>`)
-        .join("");
-}
-
-function renderAuthMessage(message, className = "auth-message") {
-    return message ? `<p class="${className}" role="status">${escapeHTML(message)}</p>` : "";
-}
-
-function renderSignupPage(message = "") {
-    return `
-        <div class="login-shell">
-            <section class="login-card" aria-labelledby="authTitle">
-                <div class="login-header">
-                    <p class="eyebrow">CREATE YOUR WORKSPACE</p>
-                    <h2 id="authTitle">Sign up</h2>
-                    <p>Create an account and choose your role. Your role determines the workspace you see after signing in.</p>
-                </div>
-                ${renderAuthMessage(message)}
-                <p id="authError" class="auth-error" role="alert" hidden></p>
-                <form id="signupForm" class="login-form">
-                    <label>
-                        <span>Full name</span>
-                        <input name="fullName" type="text" autocomplete="name" minlength="2" maxlength="80" required>
-                    </label>
-                    <label>
-                        <span>Email address</span>
-                        <input name="email" type="email" autocomplete="email" maxlength="255" required>
-                    </label>
-                    <label>
-                        <span>Choose your role</span>
-                        <select name="role" autocomplete="organization-title" required>
-                            <option value="" selected disabled>Select a role</option>
-                            ${renderAccountOptions()}
-                        </select>
-                    </label>
-                    <label>
-                        <span>Password</span>
-                        <input name="password" type="password" autocomplete="new-password" minlength="8" required>
-                    </label>
-                    <label>
-                        <span>Confirm password</span>
-                        <input name="password_confirmation" type="password" autocomplete="new-password" minlength="8" required>
-                    </label>
-                    <button type="submit" class="primary-button login-button">Create account</button>
-                </form>
-                <p class="auth-switch">Already have an account? <button type="button" data-auth-mode="login">Sign in</button></p>
-                <p class="auth-storage-note">Your account and role are saved in the warehouse database.</p>
-            </section>
-        </div>
-    `;
-}
-
-function renderLoginPage(message = "", email = "") {
-    return `
-        <div class="login-shell">
-            <section class="login-card" aria-labelledby="authTitle">
-                <div class="login-header">
-                    <p class="eyebrow">SECURE ACCESS</p>
-                    <h2 id="authTitle">Welcome back</h2>
-                    <p>Sign in to continue to your assigned role workspace.</p>
-                </div>
-                ${renderAuthMessage(message)}
-                <p id="authError" class="auth-error" role="alert" hidden></p>
-                <form id="loginForm" class="login-form">
-                    <label>
-                        <span>Email address</span>
-                        <input name="email" type="email" value="${escapeHTML(email)}" autocomplete="email" required>
-                    </label>
-                    <label>
-                        <span>Password</span>
-                        <input name="password" type="password" autocomplete="current-password" required>
-                    </label>
-                    <button type="submit" class="primary-button login-button">Sign in</button>
-                </form>
-                <p class="auth-switch">New to the workspace? <button type="button" data-auth-mode="signup">Create an account</button></p>
-                <p class="auth-storage-note">Sign in with the email and password saved to your warehouse account.</p>
-            </section>
-        </div>
-    `;
 }
 
 function showAuthError(message) {
@@ -2093,6 +1993,22 @@ appView.addEventListener("click", event => {
         if (product) {
             showStatusModal(product);
         }
+    } else if (action === "prioritize-distribution") {
+        const product = inventory.find(item => item.id === productId);
+
+        if (
+            authState.role !== "Sales & Distribution Staff"
+            || !product
+            || product.status === "Expired"
+            || getDaysRemaining(product) < 0
+            || getDaysRemaining(product) > 30
+        ) {
+            return;
+        }
+
+        product.status = "For Distribution";
+        renderPage(currentPage);
+        showToast(`${product.name} prioritized for distribution.`);
     } else if (action === "mark-read") {
         readAlertIds.add(alertId);
         renderPage("alerts");

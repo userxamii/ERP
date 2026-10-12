@@ -21,3 +21,14 @@ test('includes the operations page in the warehouse workspace navigation', funct
         ->toContain('data-page="operations"')
         ->toContain('>Operations<');
 });
+
+
+test('serves separated warehouse screen modules', function () {
+    expect(file_get_contents(base_path('product-monitor/index.html')))
+        ->toContain('/product-monitor/screens/auth.js')
+        ->toContain('/product-monitor/screens/sales-and-distribution-staff.js');
+
+    $this->get('/product-monitor/screens/sales-and-distribution-staff.js')
+        ->assertOk()
+        ->assertHeader('Content-Type', 'text/javascript; charset=UTF-8');
+});

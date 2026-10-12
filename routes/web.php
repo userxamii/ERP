@@ -26,6 +26,14 @@ Route::prefix('product-monitor')->group(function () {
             'Content-Type' => 'text/javascript; charset=UTF-8',
         ]);
     });
+
+    Route::get('screens/{screen}.js', function (string $screen) {
+        abort_unless(in_array($screen, ['auth', 'dashboard', 'inventory', 'operations', 'alerts', 'settings', 'sales-and-distribution-staff'], true), 404);
+
+        return response()->file(base_path("product-monitor/screens/{$screen}.js"), [
+            'Content-Type' => 'text/javascript; charset=UTF-8',
+        ]);
+    });
 });
 
 Route::prefix('warehouse/auth')->name('warehouse.auth.')->group(function () {
