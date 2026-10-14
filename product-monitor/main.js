@@ -7,6 +7,8 @@ import { renderLoginScreen, renderSignupScreen } from './screens/auth.js';
 import { salesDistributionStaff } from './screens/sales-and-distribution-staff.js';
 
 window.salesDistributionStaff = salesDistributionStaff;
+window.renderLoginPage = renderLoginScreen;
+window.renderSignupPage = renderSignupScreen;
 
 const pageHandlers = {
     dashboard: () => {

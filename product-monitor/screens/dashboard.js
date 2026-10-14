@@ -5,19 +5,6 @@ function renderDashboard() {
         return salesDistributionStaff.renderDashboard();
     }
 
-    const totalUnits = inventory.reduce((total, product) => total + product.quantity, 0);
-    const agingCount = inventory.filter(product => (
-        getInventoryAge(product) > 30
-        && getDaysRemaining(product) >= 0
-        && product.status !== "Expired"
-    )).length;
-    const expiringCount = inventory.filter(product => {
-        const daysRemaining = getDaysRemaining(product);
-        return daysRemaining >= 0 && daysRemaining <= 30 && product.status !== "Expired";
-    }).length;
-    const expiredCount = inventory.filter(product => (
-        getDaysRemaining(product) < 0 || product.status === "Expired"
-    )).length;
     const alerts = getActiveAlerts().slice(0, 4);
     const roleSummary = roleHighlights[authState.role] || roleHighlights["Warehouse Staff"];
     const roleCards = getRoleDashboardCards(authState.role);
