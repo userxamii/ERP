@@ -769,6 +769,40 @@ async function sendAuthRequest(endpoint, data) {
     return payload;
 }
 
+async function sendWorkspaceRequest(endpoint, data, method = "POST") {
+    const response = await fetch(endpoint, {
+        method,
+        credentials: "same-origin",
+        headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": csrfToken,
+        },
+        body: JSON.stringify(data),
+    });
+    const payload = await response.json();
+
+    if (!response.ok) {
+        const validationMessage = Object.values(payload.errors || {}).flat()[0];
+        throw new Error(validationMessage || payload.message || `The request failed (${response.status}).`);
+    }
+
+    return payload;
+}
+
+function applyWorkspaceState(workspaceState) {
+    Object.entries(workspaceState.productStatuses).forEach(([productId, status]) => {
+        const product = inventory.find(item => item.id === productId);
+
+        if (product && statusOptions.includes(status)) {
+            product.status = status;
+        }
+    });
+
+    readAlertIds.clear();
+    workspaceState.readAlertIds.forEach(alertId => readAlertIds.add(alertId));
+}
+
 async function registerAccount(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
@@ -800,6 +834,7 @@ async function loginUser(event) {
     authState.role = payload.user.role;
     authState.email = payload.user.email;
     authState.fullName = payload.user.name;
+    applyWorkspaceState(payload.workspaceState);
     authState.isAuthenticated = true;
     authState.hasAccounts = true;
 
@@ -815,6 +850,7 @@ async function logoutUser() {
     authState.role = "Warehouse Staff";
     authState.email = "";
     authState.fullName = "";
+    readAlertIds.clear();
     window.location.hash = "";
     applyAuthState();
 }
@@ -1211,16 +1247,34 @@ appView.addEventListener("click", event => {
             return;
         }
 
-        product.status = "For Distribution";
-        renderPage(currentPage);
-        showToast(`${product.name} prioritized for distribution.`);
+        sendWorkspaceRequest(`/warehouse/workspace/products/${encodeURIComponent(product.id)}/status`, {
+            status: "For Distribution",
+        }, "PATCH")
+            .then(() => {
+                product.status = "For Distribution";
+                renderPage(currentPage);
+                showToast(`${product.name} prioritized for distribution.`);
+            })
+            .catch(error => showToast(error.message));
     } else if (action === "mark-read") {
-        readAlertIds.add(alertId);
-        renderPage("alerts");
+        sendWorkspaceRequest(`/warehouse/workspace/alerts/${encodeURIComponent(alertId)}/read`, {})
+            .then(() => {
+                readAlertIds.add(alertId);
+                renderPage("alerts");
+            })
+            .catch(error => showToast(error.message));
     } else if (action === "mark-all-read") {
-        getActiveAlerts().forEach(alert => readAlertIds.add(alert.id));
-        renderPage("alerts");
-        showToast("All active alerts marked as read.");
+        const alertIds = getActiveAlerts().map(alert => alert.id);
+
+        sendWorkspaceRequest("/warehouse/workspace/alerts/read", {
+            alert_ids: alertIds,
+        })
+            .then(() => {
+                alertIds.forEach(id => readAlertIds.add(id));
+                renderPage("alerts");
+                showToast("All active alerts marked as read.");
+            })
+            .catch(error => showToast(error.message));
     }
 });
 
@@ -1255,10 +1309,22 @@ modalContent.addEventListener("submit", event => {
         return;
     }
 
-    product.status = newStatus;
-    closeModal();
-    renderPage(currentPage);
-    showToast(`${product.name} status updated to ${newStatus}.`);
+    const submitButton = event.target.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+
+    sendWorkspaceRequest(`/warehouse/workspace/products/${encodeURIComponent(product.id)}/status`, {
+        status: newStatus,
+    }, "PATCH")
+        .then(() => {
+            product.status = newStatus;
+            closeModal();
+            renderPage(currentPage);
+            showToast(`${product.name} status updated to ${newStatus}.`);
+        })
+        .catch(error => showToast(error.message))
+        .finally(() => {
+            submitButton.disabled = false;
+        });
 });
 
 document.getElementById("notificationButton").addEventListener("click", () => {
@@ -1334,6 +1400,7 @@ async function initializeAuthentication() {
             authState.role = session.user.role;
             authState.email = session.user.email;
             authState.fullName = session.user.name;
+            applyWorkspaceState(session.workspaceState);
         }
 
         applyAuthState();

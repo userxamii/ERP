@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\WarehouseAuthController;
+use App\Http\Controllers\WarehouseWorkspaceController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -35,6 +36,16 @@ Route::prefix('warehouse/auth')->name('warehouse.auth.')->group(function () {
     Route::post('register', [WarehouseAuthController::class, 'register'])->middleware('guest')->name('register');
     Route::post('login', [WarehouseAuthController::class, 'login'])->middleware('guest')->name('login');
     Route::post('logout', [WarehouseAuthController::class, 'logout'])->middleware('auth')->name('logout');
+});
+
+Route::prefix('warehouse/workspace')->name('warehouse.workspace.')->middleware('auth')->group(function () {
+    Route::patch('products/{productId}/status', [WarehouseWorkspaceController::class, 'updateProductStatus'])
+        ->where('productId', '[A-Za-z0-9-]+')
+        ->name('products.status.update');
+    Route::post('alerts/read', [WarehouseWorkspaceController::class, 'markAlertsRead'])->name('alerts.read-all');
+    Route::post('alerts/{alertId}/read', [WarehouseWorkspaceController::class, 'markAlertRead'])
+        ->where('alertId', '[A-Za-z0-9-]+')
+        ->name('alerts.read');
 });
 
 Route::middleware(['auth'])->group(function () {
