@@ -36,7 +36,7 @@ function renderDashboard() {
         </section>
 
         <section class="stats-grid" aria-label="Inventory summary">
-            ${roleCards.map(card => renderStatCard(card.label, card.value, card.note, card.color, card.label === "Receiving queue" ? '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4.3 7.7 7.7 4.4 7.7-4.4M12 12v9M8 5.2l8 4.6"/></svg>' : card.label === "Reorder alerts" ? '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12"/><path d="M5.5 17.5 12 21l6.5-3.5"/><path d="M5.5 9.5 12 13l6.5-3.5"/></svg>' : card.label === "Available units" ? '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4.3 7.7 7.7 4.4 7.7-4.4M12 12v9M8 5.2l8 4.6"/></svg>' : card.label === "Estimated value" ? '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M17 6.5A4.5 4.5 0 0 0 12 5a4.5 4.5 0 0 0 0 9 4.5 4.5 0 0 1 0 9 4.5 4.5 0 0 1-5-1.5"/></svg>' : '<svg viewBox="0 0 24 24" fill="none"><path d="m4 7 8-4 8 4v10l-8 4-8-4V7Z"/><path d="m4.3 7.2 7.7 4.3 7.7-4.3M12 11.5V21"/></svg>')).join("")}
+            ${roleCards.map(card => renderStatCard(card.label, card.value, card.note, card.color, card.icon || getStatCardIcon(card.label))).join("")}
         </section>
 
         <section class="panel role-panel">

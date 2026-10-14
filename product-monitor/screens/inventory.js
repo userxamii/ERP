@@ -55,7 +55,7 @@ function renderTablePage(page) {
                 </div>
                 <div class="table-toolbar">
                     <label class="search-field">
-                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                         <input id="productSearch" type="search" placeholder="Search products..." aria-label="Search products">
                     </label>
                     <label class="select-field">

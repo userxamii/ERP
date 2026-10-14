@@ -30,6 +30,38 @@ const salesDistributionStaff = {
         "Outbound stock reservation updated",
         "Risk flag shared with fulfillment team",
     ],
+    getDashboardCards() {
+        const expiringProducts = inventory
+            .filter(product => {
+                const daysRemaining = getDaysRemaining(product);
+                return daysRemaining >= 0 && daysRemaining <= 30 && product.status !== "Expired";
+            })
+            .sort((first, second) => first.expiration.localeCompare(second.expiration));
+        const prioritizedCount = expiringProducts.filter(product => product.status === "For Distribution").length;
+        return [
+            {
+                label: "Finished products",
+                value: String(inventory.length),
+                note: "Tracked inventory records",
+                color: "blue",
+                icon: (typeof getStatCardIcon === "function" ? getStatCardIcon("Finished products") : '<svg viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>'),
+            },
+            {
+                label: "Nearing expiration",
+                value: String(expiringProducts.length),
+                note: "Within the next 30 days",
+                color: "orange",
+                icon: (typeof getStatCardIcon === "function" ? getStatCardIcon("Nearing expiration") : '<svg viewBox="0 0 24 24" fill="none"><path d="M8 2v4M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M12 14v4M12 18h3"/></svg>'),
+            },
+            {
+                label: "Prioritized for distribution",
+                value: String(prioritizedCount),
+                note: "Marked for distribution",
+                color: "green",
+                icon: (typeof getStatCardIcon === "function" ? getStatCardIcon("Prioritized for distribution") : '<svg viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'),
+            },
+        ];
+    },
     renderDashboard() {
         const expiringProducts = inventory
             .filter(product => {
@@ -38,30 +70,7 @@ const salesDistributionStaff = {
             })
             .sort((first, second) => first.expiration.localeCompare(second.expiration));
         const expirationAlerts = getActiveAlerts().filter(alert => alert.category === "expiration");
-        const prioritizedCount = expiringProducts.filter(product => product.status === "For Distribution").length;
-        const cards = [
-            {
-                label: "Finished products",
-                value: String(inventory.length),
-                note: "Tracked inventory records",
-                color: "blue",
-                icon: '<svg viewBox="0 0 24 24" fill="none"><path d="m4 7 8-4 8 4v10l-8 4-8-4V7Z"/><path d="m4.3 7.2 7.7 4.3 7.7-4.3M12 11.5V21"/></svg>',
-            },
-            {
-                label: "Nearing expiration",
-                value: String(expiringProducts.length),
-                note: "Within the next 30 days",
-                color: "orange",
-                icon: renderAlertIcon("expiration"),
-            },
-            {
-                label: "Prioritized for distribution",
-                value: String(prioritizedCount),
-                note: "Marked for distribution",
-                color: "green",
-                icon: '<svg viewBox="0 0 24 24" fill="none"><path d="m5 12 4 4 10-10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-            },
-        ];
+        const cards = this.getDashboardCards();
 
         return `
             <section class="welcome-row">
