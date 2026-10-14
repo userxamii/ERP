@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Warehouse\WarehouseController;
 use App\Http\Controllers\WarehouseAuthController;
 use App\Http\Controllers\WarehouseWorkspaceController;
 use Illuminate\Support\Facades\Route;
@@ -62,6 +63,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('admin', function () {
         return Inertia::render('admin/index');
     })->name('admin');
+
+    // Warehouse Staff Dashboard Routes
+    Route::prefix('warehouse')->name('warehouse.')->group(function () {
+        Route::get('/dashboard', [WarehouseController::class, 'index'])->name('dashboard');
+    });
 });
 
 require __DIR__.'/settings.php';
