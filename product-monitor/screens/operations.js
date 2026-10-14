@@ -76,3 +76,7 @@ function renderOperationsPage() {
         </section>
     `;
 }
+
+export function renderOperationsScreen() {
+    return renderOperationsPage();
+}

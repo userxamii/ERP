@@ -31,28 +31,6 @@ return new class extends Migration
             $table->foreignId('department_id')->nullable()->constrained()->nullOnDelete();
         });
 
-        Schema::create('materials', function (Blueprint $table) {
-            $table->id();
-            $table->string('sku')->unique();
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->string('unit_of_measure');
-            $table->decimal('reorder_level', 15, 3)->default(0);
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-        });
-
-        Schema::create('suppliers', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('contact_name')->nullable();
-            $table->string('email')->nullable();
-            $table->string('phone')->nullable();
-            $table->text('address')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-        });
-
         Schema::create('warehouses', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
@@ -60,25 +38,6 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-        });
-
-        Schema::create('inventory_batches', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('material_id')->constrained()->restrictOnDelete();
-            $table->foreignId('warehouse_id')->constrained()->restrictOnDelete();
-            $table->foreignId('supplier_id')->nullable()->constrained()->nullOnDelete();
-            $table->string('batch_number');
-            $table->decimal('quantity_on_hand', 15, 3)->default(0);
-            $table->decimal('unit_cost', 15, 2)->nullable();
-            $table->timestamp('received_at')->nullable();
-            $table->date('expires_at')->nullable();
-            $table->string('status')->default('available');
-            $table->timestamps();
-
-            $table->unique(
-                ['material_id', 'warehouse_id', 'batch_number'],
-                'inventory_batches_material_warehouse_batch_unique',
-            );
         });
 
         Schema::create('material_requests', function (Blueprint $table) {
@@ -167,10 +126,7 @@ return new class extends Migration
         Schema::dropIfExists('stock_movements');
         Schema::dropIfExists('material_request_items');
         Schema::dropIfExists('material_requests');
-        Schema::dropIfExists('inventory_batches');
         Schema::dropIfExists('warehouses');
-        Schema::dropIfExists('suppliers');
-        Schema::dropIfExists('materials');
 
         Schema::table('users', function (Blueprint $table) {
             $table->dropConstrainedForeignId('department_id');

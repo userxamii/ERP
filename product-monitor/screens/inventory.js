@@ -221,3 +221,7 @@ function getProductsForPage(page) {
 
     return inventory;
 }
+
+export function renderInventoryScreen(page = 'inventory') {
+    return renderTablePage(page);
+}

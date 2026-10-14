@@ -1,3 +1,5 @@
+import { salesDistributionStaff } from './sales-and-distribution-staff.js';
+
 function renderDashboard() {
     if (authState.role === "Sales & Distribution Staff") {
         return salesDistributionStaff.renderDashboard();
@@ -246,4 +248,12 @@ function renderCompactInventory() {
             </table>
         </div>
     `;
+}
+
+export function renderDashboardScreen() {
+    return renderDashboard();
+}
+
+export function renderProcurementDashboardScreen() {
+    return window.renderProcurementDashboard();
 }

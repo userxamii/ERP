@@ -82,3 +82,11 @@ function renderLoginPage(message = "", email = "") {
         </div>
     `;
 }
+
+export function renderSignupScreen(message = '') {
+    return renderSignupPage(message);
+}
+
+export function renderLoginScreen(message = '', email = '') {
+    return renderLoginPage(message, email);
+}

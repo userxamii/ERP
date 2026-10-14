@@ -5,7 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#020a11">
     <title>User Screens & Role Requirements</title>
-    <link rel="stylesheet" href="/product-monitor/style.css?v=profile-icons-2">
+    <link rel="stylesheet" href="/product-monitor/style.css?v=distribution-merge-1">
+    <link rel="modulepreload" href="/product-monitor/screens/auth.js">
+    <link rel="modulepreload" href="/product-monitor/screens/dashboard.js">
+    <link rel="modulepreload" href="/product-monitor/screens/inventory.js">
+    <link rel="modulepreload" href="/product-monitor/screens/operations.js">
+    <link rel="modulepreload" href="/product-monitor/screens/alerts.js">
+    <link rel="modulepreload" href="/product-monitor/screens/settings.js">
+    <link rel="modulepreload" href="/product-monitor/screens/sales-and-distribution-staff.js">
 </head>
 <body>
     <aside class="sidebar">
@@ -89,13 +96,7 @@
     </div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <script src="/product-monitor/screens/auth.js?v=screens-1" defer></script>
-    <script src="/product-monitor/screens/dashboard.js?v=screens-1" defer></script>
-    <script src="/product-monitor/screens/inventory.js?v=screens-1" defer></script>
-    <script src="/product-monitor/screens/operations.js?v=screens-1" defer></script>
-    <script src="/product-monitor/screens/alerts.js?v=screens-1" defer></script>
-    <script src="/product-monitor/screens/settings.js?v=screens-1" defer></script>
-    <script src="/product-monitor/screens/sales-and-distribution-staff.js?v=screens-1" defer></script>
-    <script src="/product-monitor/script.js?v=profile-icons-2" defer></script>
+    <script src="/product-monitor/script.js?v=distribution-merge-1" defer></script>
+    <script type="module" src="/product-monitor/main.js?v=distribution-merge-1"></script>
 </body>
 </html>

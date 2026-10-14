@@ -133,3 +133,5 @@ const salesDistributionStaff = {
         `;
     },
 };
+
+export { salesDistributionStaff };

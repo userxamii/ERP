@@ -22,6 +22,12 @@ Route::prefix('product-monitor')->group(function () {
         ]);
     });
 
+    Route::get('main.js', function () {
+        return response()->file(base_path('product-monitor/main.js'), [
+            'Content-Type' => 'text/javascript; charset=UTF-8',
+        ]);
+    });
+
     Route::get('screens/{screen}.js', function (string $screen) {
         abort_unless(in_array($screen, ['auth', 'dashboard', 'inventory', 'operations', 'alerts', 'settings', 'sales-and-distribution-staff'], true), 404);
 
@@ -52,6 +58,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+
+    Route::get('admin', function () {
+        return Inertia::render('admin/index');
+    })->name('admin');
 });
 
 require __DIR__.'/settings.php';
