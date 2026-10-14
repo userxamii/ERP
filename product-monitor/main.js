@@ -5,6 +5,7 @@ import { renderAlertsScreen } from './screens/alerts.js';
 import { renderSettingsScreen } from './screens/settings.js';
 import { renderLoginScreen, renderSignupScreen } from './screens/auth.js';
 import { salesDistributionStaff } from './screens/sales-and-distribution-staff.js';
+import { warehouseStaff } from './screens/warehouse-staff.js';
 
 window.salesDistributionStaff = salesDistributionStaff;
 window.renderLoginPage = renderLoginScreen;
@@ -14,6 +15,14 @@ const pageHandlers = {
     dashboard: () => {
         if (window.authState && window.authState.role === 'Procurement Staff') {
             return renderProcurementDashboardScreen();
+        }
+
+        if (window.authState && window.authState.role === 'Sales & Distribution Staff') {
+            return salesDistributionStaff.renderDashboard();
+        }
+
+        if (window.authState && window.authState.role === 'Warehouse Staff') {
+            return warehouseStaff.renderDashboard();
         }
 
         return renderDashboardScreen();
@@ -32,22 +41,30 @@ function applyScreenRouting() {
     }
 
     window.renderPage = function renderPage(page) {
-        window.setCurrentPage(page);
-        const handler = pageHandlers[page] || pageHandlers.dashboard;
+        const safePage = Object.hasOwn(pageHandlers, page) && window.isPageAllowed(page)
+            ? page
+            : 'dashboard';
+
+        if (safePage !== page) {
+            window.location.hash = safePage;
+        }
+
+        window.setCurrentPage(safePage);
+        const handler = pageHandlers[safePage];
         const content = handler();
         const target = window.appView || document.getElementById('appView');
 
         if (target && typeof content === 'string') {
             target.innerHTML = content;
 
-            if (['inventory', 'aging', 'expiring'].includes(page)) {
-                window.renderInventoryRows(page);
+            if (['inventory', 'aging', 'expiring'].includes(safePage)) {
+                window.renderInventoryRows(safePage);
             }
 
             return;
         }
 
-        return window.__legacyRenderPage(page);
+        return window.__legacyRenderPage(safePage);
     };
 
     if (typeof window.showAuthMode === 'function') {

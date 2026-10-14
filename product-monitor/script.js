@@ -619,6 +619,8 @@ function getAllowedPages() {
     return rolePermissions[authState.role] || ["dashboard"];
 }
 
+window.isPageAllowed = page => getAllowedPages().includes(page);
+
 function getNameInitials(name) {
     const words = String(name || "")
         .trim()
