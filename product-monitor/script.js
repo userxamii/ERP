@@ -144,9 +144,66 @@ const roleHighlights = {
     ],
 };
 
+function getStatCardIcon(label) {
+    const icons = {
+        // Warehouse Staff
+        "Receiving queue": '<svg viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>',
+        "Stock moves": '<svg viewBox="0 0 24 24" fill="none"><path d="M17 3v10"/><path d="m21 9-4 4-4-4"/><path d="M7 21V11"/><path d="m3 15 4-4 4 4"/></svg>',
+        "Aging stock": '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+
+        // Procurement Staff
+        "Reorder alerts": '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12"/><path d="M5.5 17.5 12 21l6.5-3.5"/><path d="M5.5 9.5 12 13l6.5-3.5"/></svg>',
+        "Expected deliveries": '<svg viewBox="0 0 24 24" fill="none"><rect width="16" height="13" x="1" y="3" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+        "Risk items": '<svg viewBox="0 0 24 24" fill="none"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+
+        // Production Staff
+        "Available units": '<svg viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>',
+        "Ready batches": '<svg viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+        "FEFO queue": '<svg viewBox="0 0 24 24" fill="none"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M12 14v4M12 18h3"/></svg>',
+
+        // Quality Assurance (QA)
+        "Pending inspection": '<svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><path d="m8 11 2 2 4-4"/></svg>',
+        "Released stock": '<svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>',
+        "Hold review": '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>',
+
+        // Finance Staff
+        "Estimated value": '<svg viewBox="0 0 24 24" fill="none"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+        "Loss exposure": '<svg viewBox="0 0 24 24" fill="none"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>',
+        "Valuation cycles": '<svg viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
+
+        // Management
+        "Active batches": '<svg viewBox="0 0 24 24" fill="none"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+        "Aging risk": '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+        "Expired value": '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+
+        // System Administrator
+        "User accounts": '<svg viewBox="0 0 24 24" fill="none"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+        "Audit events": '<svg viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+        "Alert rules": '<svg viewBox="0 0 24 24" fill="none"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
+
+        // Operations
+        "Open tasks": '<svg viewBox="0 0 24 24" fill="none"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></svg>',
+        "Urgent": '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+        "Ready": '<svg viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+
+        // Sales & Distribution
+        "Finished products": '<svg viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>',
+        "Nearing expiration": '<svg viewBox="0 0 24 24" fill="none"><path d="M8 2v4M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M12 14v4M12 18h3"/></svg>',
+        "Prioritized for distribution": '<svg viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    };
+
+    return icons[label] || '<svg viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>';
+}
+
 function getRoleDashboardCards(role) {
     if (role === "Sales & Distribution Staff") {
-        return salesDistributionStaff.getDashboardCards();
+        return typeof salesDistributionStaff !== "undefined" && typeof salesDistributionStaff.getDashboardCards === "function"
+            ? salesDistributionStaff.getDashboardCards()
+            : [
+                { label: "Finished products", value: String(inventory.length), note: "Tracked inventory records", color: "blue", icon: getStatCardIcon("Finished products") },
+                { label: "Nearing expiration", value: String(inventory.filter(p => getDaysRemaining(p) >= 0 && getDaysRemaining(p) <= 30 && p.status !== "Expired").length), note: "Within the next 30 days", color: "orange", icon: getStatCardIcon("Nearing expiration") },
+                { label: "Prioritized for distribution", value: String(inventory.filter(p => p.status === "For Distribution").length), note: "Marked for distribution", color: "green", icon: getStatCardIcon("Prioritized for distribution") },
+            ];
     }
 
     const totalInStock = inventory.reduce((sum, product) => sum + product.quantity, 0);
@@ -156,39 +213,39 @@ function getRoleDashboardCards(role) {
 
     const roleMap = {
         "Warehouse Staff": [
-            { label: "Receiving queue", value: "4 batches", note: "Awaiting intake review", color: "blue" },
-            { label: "Stock moves", value: "12 entries", note: "This week", color: "orange" },
-            { label: "Aging stock", value: agingItems, note: "Older than 30 days", color: "amber" },
+            { label: "Receiving queue", value: "4 batches", note: "Awaiting intake review", color: "blue", icon: getStatCardIcon("Receiving queue") },
+            { label: "Stock moves", value: "12 entries", note: "This week", color: "orange", icon: getStatCardIcon("Stock moves") },
+            { label: "Aging stock", value: agingItems, note: "Older than 30 days", color: "amber", icon: getStatCardIcon("Aging stock") },
         ],
         "Procurement Staff": [
-            { label: "Reorder alerts", value: lowStock, note: "Below target stock", color: "orange" },
-            { label: "Expected deliveries", value: "3 orders", note: "In transit", color: "blue" },
-            { label: "Risk items", value: expiringSoon, note: "Priority purchases", color: "red" },
+            { label: "Reorder alerts", value: lowStock, note: "Below target stock", color: "orange", icon: getStatCardIcon("Reorder alerts") },
+            { label: "Expected deliveries", value: "3 orders", note: "In transit", color: "blue", icon: getStatCardIcon("Expected deliveries") },
+            { label: "Risk items", value: expiringSoon, note: "Priority purchases", color: "red", icon: getStatCardIcon("Risk items") },
         ],
         "Production Staff": [
-            { label: "Available units", value: totalInStock.toLocaleString(), note: "Usable stock", color: "blue" },
-            { label: "Ready batches", value: "5", note: "QA cleared", color: "green" },
-            { label: "FEFO queue", value: expiringSoon, note: "Next expiry review", color: "amber" },
+            { label: "Available units", value: totalInStock.toLocaleString(), note: "Usable stock", color: "blue", icon: getStatCardIcon("Available units") },
+            { label: "Ready batches", value: "5", note: "QA cleared", color: "green", icon: getStatCardIcon("Ready batches") },
+            { label: "FEFO queue", value: expiringSoon, note: "Next expiry review", color: "amber", icon: getStatCardIcon("FEFO queue") },
         ],
         "Quality Assurance (QA)": [
-            { label: "Pending inspection", value: "3 batches", note: "Queue", color: "orange" },
-            { label: "Released stock", value: "18", note: "Approved batches", color: "green" },
-            { label: "Hold review", value: "2 items", note: "Requires action", color: "red" },
+            { label: "Pending inspection", value: "3 batches", note: "Queue", color: "orange", icon: getStatCardIcon("Pending inspection") },
+            { label: "Released stock", value: "18", note: "Approved batches", color: "green", icon: getStatCardIcon("Released stock") },
+            { label: "Hold review", value: "2 items", note: "Requires action", color: "red", icon: getStatCardIcon("Hold review") },
         ],
         "Finance Staff": [
-            { label: "Estimated value", value: "$48.6K", note: "Inventory value", color: "blue" },
-            { label: "Loss exposure", value: "$8.4K", note: "Expired / rejected", color: "red" },
-            { label: "Valuation cycles", value: "12", note: "This month", color: "amber" },
+            { label: "Estimated value", value: "$48.6K", note: "Inventory value", color: "blue", icon: getStatCardIcon("Estimated value") },
+            { label: "Loss exposure", value: "$8.4K", note: "Expired / rejected", color: "red", icon: getStatCardIcon("Loss exposure") },
+            { label: "Valuation cycles", value: "12", note: "This month", color: "amber", icon: getStatCardIcon("Valuation cycles") },
         ],
         Management: [
-            { label: "Active batches", value: inventory.length, note: "Tracked records", color: "blue" },
-            { label: "Aging risk", value: agingItems, note: "High-risk stock", color: "orange" },
-            { label: "Expired value", value: "$7.1K", note: "Exposure tracked", color: "red" },
+            { label: "Active batches", value: inventory.length, note: "Tracked records", color: "blue", icon: getStatCardIcon("Active batches") },
+            { label: "Aging risk", value: agingItems, note: "High-risk stock", color: "orange", icon: getStatCardIcon("Aging risk") },
+            { label: "Expired value", value: "$7.1K", note: "Exposure tracked", color: "red", icon: getStatCardIcon("Expired value") },
         ],
         "System Administrator": [
-            { label: "User accounts", value: "26", note: "Active users", color: "blue" },
-            { label: "Audit events", value: "184", note: "This week", color: "green" },
-            { label: "Alert rules", value: "9", note: "Configured thresholds", color: "amber" },
+            { label: "User accounts", value: "26", note: "Active users", color: "blue", icon: getStatCardIcon("User accounts") },
+            { label: "Audit events", value: "184", note: "This week", color: "green", icon: getStatCardIcon("Audit events") },
+            { label: "Alert rules", value: "9", note: "Configured thresholds", color: "amber", icon: getStatCardIcon("Alert rules") },
         ],
     };
 
@@ -573,6 +630,23 @@ function getRoleInitials(role) {
     return initials || "WM";
 }
 
+function getNameInitials(name) {
+    const words = String(name || "")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+
+    if (words.length === 0) {
+        return "WM";
+    }
+
+    const initials = words.slice(0, 2)
+        .map(word => word[0]?.toUpperCase() ?? "")
+        .join("");
+
+    return initials || "WM";
+}
+
 function applyRoleTheme() {
     const theme = authState.role === "Sales & Distribution Staff"
         ? salesDistributionStaff.theme
@@ -596,7 +670,7 @@ function syncProfile() {
     const sidebarAvatars = document.querySelectorAll(".sidebar-user .avatar");
     const profileAvatars = document.querySelectorAll(".profile .avatar");
     const accountName = authState.fullName || authState.role;
-    const accountInitials = getRoleInitials(accountName);
+    const accountInitials = getNameInitials(accountName);
 
     applyRoleTheme();
 
@@ -699,6 +773,40 @@ async function sendAuthRequest(endpoint, data) {
     return payload;
 }
 
+async function sendWorkspaceRequest(endpoint, data, method = "POST") {
+    const response = await fetch(endpoint, {
+        method,
+        credentials: "same-origin",
+        headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": csrfToken,
+        },
+        body: JSON.stringify(data),
+    });
+    const payload = await response.json();
+
+    if (!response.ok) {
+        const validationMessage = Object.values(payload.errors || {}).flat()[0];
+        throw new Error(validationMessage || payload.message || `The request failed (${response.status}).`);
+    }
+
+    return payload;
+}
+
+function applyWorkspaceState(workspaceState) {
+    Object.entries(workspaceState.productStatuses).forEach(([productId, status]) => {
+        const product = inventory.find(item => item.id === productId);
+
+        if (product && statusOptions.includes(status)) {
+            product.status = status;
+        }
+    });
+
+    readAlertIds.clear();
+    workspaceState.readAlertIds.forEach(alertId => readAlertIds.add(alertId));
+}
+
 async function registerAccount(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
@@ -730,6 +838,7 @@ async function loginUser(event) {
     authState.role = payload.user.role;
     authState.email = payload.user.email;
     authState.fullName = payload.user.name;
+    applyWorkspaceState(payload.workspaceState);
     authState.isAuthenticated = true;
     authState.hasAccounts = true;
 
@@ -745,6 +854,7 @@ async function logoutUser() {
     authState.role = "Warehouse Staff";
     authState.email = "";
     authState.fullName = "";
+    readAlertIds.clear();
     window.location.hash = "";
     applyAuthState();
 }
@@ -886,9 +996,10 @@ function updateAlertCounts() {
 }
 
 function renderStatCard(label, value, note, color, icon) {
+    const resolvedIcon = icon || (typeof getStatCardIcon === "function" ? getStatCardIcon(label) : "");
     return `
         <article class="stat-card">
-            <div class="stat-icon ${color}">${icon}</div>
+            <div class="stat-icon ${color}">${resolvedIcon}</div>
             <div class="stat-copy">
                 <span>${label}</span>
                 <strong>${value}</strong>
@@ -1846,7 +1957,7 @@ function showProductDetails(product) {
     openModal(`
         <div class="modal-header">
             <div><p class="eyebrow">INVENTORY RECORD</p><h2 id="modalTitle">Product details</h2></div>
-            <button class="icon-button" type="button" data-action="close-modal" aria-label="Close dialog">×</button>
+            <button class="icon-button" type="button" data-action="close-modal" aria-label="Close dialog"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
         <div class="detail-product-heading">${renderProductName(product)}${renderStatusBadge(product.status)}</div>
         <div class="detail-grid">
@@ -1869,7 +1980,7 @@ function showStatusModal(product) {
         <form id="statusForm" data-product-id="${escapeHTML(product.id)}">
             <div class="modal-header">
                 <div><p class="eyebrow">INVENTORY ACTION</p><h2 id="modalTitle">Update inventory status</h2></div>
-                <button class="icon-button" type="button" data-action="close-modal" aria-label="Close dialog">×</button>
+                <button class="icon-button" type="button" data-action="close-modal" aria-label="Close dialog"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
             <p class="modal-intro">Change the stock status for this batch. Your update will be reflected throughout the dashboard.</p>
             <div class="selected-product-card">
@@ -2010,16 +2121,34 @@ appView.addEventListener("click", event => {
             return;
         }
 
-        product.status = "For Distribution";
-        renderPage(currentPage);
-        showToast(`${product.name} prioritized for distribution.`);
+        sendWorkspaceRequest(`/warehouse/workspace/products/${encodeURIComponent(product.id)}/status`, {
+            status: "For Distribution",
+        }, "PATCH")
+            .then(() => {
+                product.status = "For Distribution";
+                renderPage(currentPage);
+                showToast(`${product.name} prioritized for distribution.`);
+            })
+            .catch(error => showToast(error.message));
     } else if (action === "mark-read") {
-        readAlertIds.add(alertId);
-        renderPage("alerts");
+        sendWorkspaceRequest(`/warehouse/workspace/alerts/${encodeURIComponent(alertId)}/read`, {})
+            .then(() => {
+                readAlertIds.add(alertId);
+                renderPage("alerts");
+            })
+            .catch(error => showToast(error.message));
     } else if (action === "mark-all-read") {
-        getActiveAlerts().forEach(alert => readAlertIds.add(alert.id));
-        renderPage("alerts");
-        showToast("All active alerts marked as read.");
+        const alertIds = getActiveAlerts().map(alert => alert.id);
+
+        sendWorkspaceRequest("/warehouse/workspace/alerts/read", {
+            alert_ids: alertIds,
+        })
+            .then(() => {
+                alertIds.forEach(id => readAlertIds.add(id));
+                renderPage("alerts");
+                showToast("All active alerts marked as read.");
+            })
+            .catch(error => showToast(error.message));
     }
 });
 
@@ -2066,10 +2195,22 @@ modalContent.addEventListener("submit", event => {
         return;
     }
 
-    product.status = newStatus;
-    closeModal();
-    renderPage(currentPage);
-    showToast(`${product.name} status updated to ${newStatus}.`);
+    const submitButton = event.target.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+
+    sendWorkspaceRequest(`/warehouse/workspace/products/${encodeURIComponent(product.id)}/status`, {
+        status: newStatus,
+    }, "PATCH")
+        .then(() => {
+            product.status = newStatus;
+            closeModal();
+            renderPage(currentPage);
+            showToast(`${product.name} status updated to ${newStatus}.`);
+        })
+        .catch(error => showToast(error.message))
+        .finally(() => {
+            submitButton.disabled = false;
+        });
 });
 
 document.getElementById("notificationButton").addEventListener("click", () => {
@@ -2145,6 +2286,7 @@ async function initializeAuthentication() {
             authState.role = session.user.role;
             authState.email = session.user.email;
             authState.fullName = session.user.name;
+            applyWorkspaceState(session.workspaceState);
         }
 
         applyAuthState();
