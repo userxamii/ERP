@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DistributionController;
 use App\Http\Controllers\Warehouse\WarehouseController;
 use App\Http\Controllers\WarehouseAuthController;
 use App\Http\Controllers\WarehouseWorkspaceController;
@@ -74,6 +75,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/movements', [WarehouseController::class, 'movements'])->name('movements');
         Route::post('/stock-outs', [WarehouseController::class, 'storeStockOut'])->name('stock-outs.store');
         Route::get('/alerts', [WarehouseController::class, 'alerts'])->name('alerts');
+    });
+
+    Route::prefix('distribution')->name('distribution.')->group(function () {
+        Route::get('/overview', [DistributionController::class, 'overview'])->name('overview');
+        Route::get('/availability-reports', [DistributionController::class, 'reports'])->name('reports');
+        Route::get('/notifications', [DistributionController::class, 'notifications'])->name('notifications');
     });
 });
 
