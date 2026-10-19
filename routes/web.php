@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DistributionController;
 use App\Http\Controllers\WarehouseAuthController;
 use App\Http\Controllers\WarehouseWorkspaceController;
 use Illuminate\Support\Facades\Route;
@@ -62,6 +63,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('admin', function () {
         return Inertia::render('admin/index');
     })->name('admin');
+    Route::prefix('distribution')->name('distribution.')->group(function () {
+        Route::get('/overview', [DistributionController::class, 'overview'])->name('overview');
+        Route::get('/availability-reports', [DistributionController::class, 'reports'])->name('reports');
+        Route::get('/notifications', [DistributionController::class, 'notifications'])->name('notifications');
+    });
 });
 
 require __DIR__.'/settings.php';
