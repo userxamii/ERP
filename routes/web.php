@@ -67,6 +67,13 @@ Route::middleware(['auth'])->group(function () {
     // Warehouse Staff Dashboard Routes
     Route::prefix('warehouse')->name('warehouse.')->group(function () {
         Route::get('/dashboard', [WarehouseController::class, 'index'])->name('dashboard');
+        Route::get('/materials', [WarehouseController::class, 'inventory'])->name('materials.inventory');
+        Route::get('/materials/{material}', [WarehouseController::class, 'showMaterial'])->name('materials.show');
+        Route::get('/receipts/create', [WarehouseController::class, 'receive'])->name('receipts.create');
+        Route::post('/receipts', [WarehouseController::class, 'storeReceipt'])->name('receipts.store');
+        Route::get('/movements', [WarehouseController::class, 'movements'])->name('movements');
+        Route::post('/stock-outs', [WarehouseController::class, 'storeStockOut'])->name('stock-outs.store');
+        Route::get('/alerts', [WarehouseController::class, 'alerts'])->name('alerts');
     });
 });
 

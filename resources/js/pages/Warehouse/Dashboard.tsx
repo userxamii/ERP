@@ -1,6 +1,6 @@
-import Navbar from '@/components/Navbar';
-import { router } from '@inertiajs/react';
-import { AlertTriangle, CheckCircle2, Clock, Package, RefreshCw, Search } from 'lucide-react';
+import WarehouseLayout from '@/components/WarehouseLayout';
+import { Link, router } from '@inertiajs/react';
+import { AlertTriangle, ArrowDownToLine, ArrowRight, CheckCircle2, Clock, Package, RefreshCw, Search, Truck } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 
@@ -29,10 +29,21 @@ type DashboardProps = {
         total: number;
         links: Array<{ url: string | null; label: string; active: boolean }>;
     };
+    categories?: Array<{ name: string; material_count: number }>;
+    recent_movements?: Array<{
+        id: number;
+        movement_type: string;
+        quantity: string;
+        material_code: string;
+        material_name: string;
+        batch_number: string | null;
+        actor: string | null;
+        occurred_at: string;
+    }>;
     filters?: { tab?: string; search?: string };
 };
 
-export default function Dashboard({ auth, stats, inventory, filters }: DashboardProps) {
+export default function Dashboard({ auth, stats, inventory, categories, recent_movements, filters }: DashboardProps) {
     const [activeTab, setActiveTab] = useState(filters?.tab || 'all');
     const [searchQuery, setSearchQuery] = useState(filters?.search || '');
 
@@ -66,19 +77,26 @@ export default function Dashboard({ auth, stats, inventory, filters }: Dashboard
     ];
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans">
-            {/* Top Navbar Component */}
-            <Navbar user={auth?.user} station="North Hub - Zone A" />
-
-            {/* Main Container */}
-            <div className="mx-auto max-w-7xl p-6 md:p-8">
-                {/* Header Title & Actions */}
+        <WarehouseLayout user={auth?.user} title="Warehouse Staff Dashboard" description="Review material stock, batch quality, and expiration risk">
+            <div>
                 <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900">Warehouse Staff Dashboard</h1>
-                        <p className="text-sm text-slate-500">Review material stock, batch quality, and expiration risk</p>
+                        <h2 className="text-lg font-semibold text-slate-900">Warehouse overview</h2>
+                        <p className="text-sm text-slate-500">Live totals from material batches and stock movements</p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
+                        <Link
+                            href={route('warehouse.receipts.create')}
+                            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+                        >
+                            <Truck size={16} /> Receive materials
+                        </Link>
+                        <Link
+                            href={route('warehouse.movements')}
+                            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-100"
+                        >
+                            <ArrowDownToLine size={16} /> Record stock-out
+                        </Link>
                         <button
                             onClick={() => router.reload()}
                             className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-100"
@@ -91,7 +109,6 @@ export default function Dashboard({ auth, stats, inventory, filters }: Dashboard
                     </div>
                 </div>
 
-                {/* KPI Metrics Grid */}
                 <div className="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                     {statCards.map((stat, idx) => {
                         const Icon = stat.icon;
@@ -110,7 +127,60 @@ export default function Dashboard({ auth, stats, inventory, filters }: Dashboard
                     })}
                 </div>
 
-                {/* Main Workspace Section */}
+                <section className="mb-8 grid gap-5 lg:grid-cols-2">
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div className="mb-4 flex items-center justify-between">
+                            <div>
+                                <h2 className="font-semibold text-slate-900">Materials by category</h2>
+                                <p className="text-xs text-slate-500">Active material types</p>
+                            </div>
+                            <Link href={route('warehouse.materials.inventory')} className="text-sm font-medium text-blue-700 hover:underline">
+                                View inventory <ArrowRight className="ml-1 inline" size={14} />
+                            </Link>
+                        </div>
+                        {categories && categories.length > 0 ? (
+                            <ul className="divide-y divide-slate-100">
+                                {categories.map((category) => (
+                                    <li key={category.name} className="flex items-center justify-between py-2.5 text-sm">
+                                        <span className="text-slate-700">{category.name}</span>
+                                        <span className="font-semibold text-slate-900">{category.material_count}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="py-6 text-center text-sm text-slate-400">No active materials recorded.</p>
+                        )}
+                    </div>
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div className="mb-4 flex items-center justify-between">
+                            <div>
+                                <h2 className="font-semibold text-slate-900">Recent stock movements</h2>
+                                <p className="text-xs text-slate-500">Latest receipts, issues, and reservations</p>
+                            </div>
+                            <Link href={route('warehouse.movements')} className="text-sm font-medium text-blue-700 hover:underline">
+                                View history <ArrowRight className="ml-1 inline" size={14} />
+                            </Link>
+                        </div>
+                        {recent_movements && recent_movements.length > 0 ? (
+                            <ul className="divide-y divide-slate-100">
+                                {recent_movements.slice(0, 5).map((movement) => (
+                                    <li key={movement.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                                        <div className="min-w-0">
+                                            <p className="truncate font-medium text-slate-800">{movement.material_name}</p>
+                                            <p className="text-xs text-slate-500">
+                                                {movement.movement_type.replaceAll('_', ' ')} · {movement.batch_number ?? movement.material_code}
+                                            </p>
+                                        </div>
+                                        <span className="shrink-0 font-mono text-slate-700">{movement.quantity}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="py-6 text-center text-sm text-slate-400">No stock movements have been recorded.</p>
+                        )}
+                    </div>
+                </section>
+
                 <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                     {/* Table Header Controls & Filters */}
                     <div className="flex flex-col justify-between gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-center">
@@ -198,7 +268,7 @@ export default function Dashboard({ auth, stats, inventory, filters }: Dashboard
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="7" className="py-8 text-center text-sm text-slate-400">
+                                        <td colSpan={7} className="py-8 text-center text-sm text-slate-400">
                                             No inventory batches match these filters.
                                         </td>
                                     </tr>
@@ -219,7 +289,7 @@ export default function Dashboard({ auth, stats, inventory, filters }: Dashboard
                                 <button
                                     key={idx}
                                     disabled={!link.url}
-                                    onClick={() => router.get(link.url, {}, { preserveState: true })}
+                                    onClick={() => link.url && router.get(link.url, {}, { preserveState: true })}
                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                     className={`rounded-md border px-3 py-1 font-medium transition ${
                                         link.active
@@ -232,6 +302,6 @@ export default function Dashboard({ auth, stats, inventory, filters }: Dashboard
                     </div>
                 </div>
             </div>
-        </div>
+        </WarehouseLayout>
     );
 }

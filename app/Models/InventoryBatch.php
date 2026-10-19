@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use App\InventoryBatchQualityStatus;
+use App\InventoryMovementType;
 use App\ProcurementQuantity;
 use Database\Factories\InventoryBatchFactory;
+use DomainException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class InventoryBatch extends Model
 {
@@ -17,9 +20,13 @@ class InventoryBatch extends Model
 
     protected $fillable = [
         'material_id',
+        'supplier_id',
+        'received_by_user_id',
         'lot_code',
         'received_at',
+        'manufactured_at',
         'expires_at',
+        'storage_location',
         'quantity_received',
         'quantity_on_hand',
         'quality_status',
@@ -29,6 +36,7 @@ class InventoryBatch extends Model
     {
         return [
             'received_at' => 'datetime',
+            'manufactured_at' => 'date',
             'expires_at' => 'date',
             'quantity_received' => 'decimal:3',
             'quantity_on_hand' => 'decimal:3',
@@ -96,5 +104,48 @@ class InventoryBatch extends Model
     public function quantityMilli(): int
     {
         return ProcurementQuantity::toMilliUnits((string) $this->quantity_on_hand);
+    }
+
+    public function recordStockOut(
+        string $quantity,
+        User $actor,
+        string $destinationLocation,
+        string $reason,
+        ?string $reference = null,
+    ): void {
+        DB::transaction(function () use ($quantity, $actor, $destinationLocation, $reason, $reference): void {
+            $batch = self::query()->whereKey($this->getKey())->lockForUpdate()->firstOrFail();
+            $quantityMilli = ProcurementQuantity::toMilliUnits($quantity);
+
+            if ($batch->quality_status !== InventoryBatchQualityStatus::Available
+                || ($batch->expires_at !== null && $batch->expires_at->isBefore(today()))) {
+                throw new DomainException('Only available, unexpired batches can be issued.');
+            }
+
+            $onHandMilli = $batch->quantityMilli();
+
+            if ($quantityMilli <= 0 || $quantityMilli > $onHandMilli) {
+                throw new DomainException('Stock-out quantity must be positive and cannot exceed the batch quantity on hand.');
+            }
+
+            $batch->quantity_on_hand = ProcurementQuantity::fromMilliUnits($onHandMilli - $quantityMilli);
+            $batch->save();
+
+            InventoryMovement::record(
+                InventoryMovementType::StockOut,
+                $batch->material,
+                $quantity,
+                ProcurementQuantity::fromSignedMilliUnits(-$quantityMilli),
+                '0.000',
+                $actor,
+                $batch,
+                sourceReference: $reference,
+                sourceLocation: $batch->storage_location,
+                destinationLocation: $destinationLocation,
+                reason: $reason,
+            );
+
+            $this->setRawAttributes($batch->getAttributes(), true);
+        });
     }
 }

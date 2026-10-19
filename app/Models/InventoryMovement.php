@@ -40,9 +40,12 @@ class InventoryMovement extends Model
             }
 
             $type = $movement->movement_type;
-            $expectedOnHandDelta = $type === InventoryMovementType::GoodsReceiptAccepted
-                ? $quantityMilli
-                : 0;
+            $expectedOnHandDelta = match ($type) {
+                InventoryMovementType::GoodsReceiptAccepted,
+                InventoryMovementType::WarehouseReceipt => $quantityMilli,
+                InventoryMovementType::StockOut => -$quantityMilli,
+                default => 0,
+            };
             $expectedReservedDelta = match ($type) {
                 InventoryMovementType::ReservationCreated => $quantityMilli,
                 InventoryMovementType::ReservationReleased => -$quantityMilli,
@@ -57,6 +60,13 @@ class InventoryMovement extends Model
             if ($type === InventoryMovementType::GoodsReceiptAccepted
                 && ($movement->goods_receipt_item_id === null || $movement->inventory_batch_id === null)) {
                 throw new DomainException('Accepted receipt movements require a batch and receipt item.');
+            }
+
+            if (in_array($type, [
+                InventoryMovementType::WarehouseReceipt,
+                InventoryMovementType::StockOut,
+            ], true) && $movement->inventory_batch_id === null) {
+                throw new DomainException('Warehouse stock movements require an inventory batch.');
             }
 
             if ($type === InventoryMovementType::GoodsReceiptRejected && $movement->goods_receipt_item_id === null) {
@@ -91,6 +101,9 @@ class InventoryMovement extends Model
         ?GoodsReceiptItem $receiptItem = null,
         ?MaterialStockReservation $reservation = null,
         ?string $sourceReference = null,
+        ?string $sourceLocation = null,
+        ?string $destinationLocation = null,
+        ?string $reason = null,
     ): self {
         $movement = new self;
         $movement->forceFill([
@@ -104,6 +117,9 @@ class InventoryMovement extends Model
             'on_hand_delta' => $onHandDelta,
             'reserved_delta' => $reservedDelta,
             'source_reference' => $sourceReference,
+            'source_location' => $sourceLocation,
+            'destination_location' => $destinationLocation,
+            'reason' => $reason,
             'occurred_at' => now(),
         ]);
         $movement->save();
