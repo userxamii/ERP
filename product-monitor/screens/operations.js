@@ -3,9 +3,9 @@ function renderOperationsPage() {
     const timeline = getRoleOperationsTimeline(authState.role);
     const insightItems = getRoleInsights(authState.role);
     const summaryCards = [
-        { label: "Open tasks", value: String(queue.length), note: "live work items", color: "blue", icon: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 6.5h16M7 12h10M10 17.5h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/></svg>' },
-        { label: "Urgent", value: String(queue.filter(task => task.status === "Priority").length), note: "priority actions", color: "orange", icon: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' },
-        { label: "Ready", value: String(queue.filter(task => task.status === "Ready").length), note: "ready to close", color: "green", icon: '<svg viewBox="0 0 24 24" fill="none"><path d="m5 12 4 4 10-10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+        { label: "Open tasks", value: String(queue.length), note: "live work items", color: "blue", icon: (typeof getStatCardIcon === "function" ? getStatCardIcon("Open tasks") : '<svg viewBox="0 0 24 24" fill="none"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></svg>') },
+        { label: "Urgent", value: String(queue.filter(task => task.status === "Priority").length), note: "priority actions", color: "orange", icon: (typeof getStatCardIcon === "function" ? getStatCardIcon("Urgent") : '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>') },
+        { label: "Ready", value: String(queue.filter(task => task.status === "Ready").length), note: "ready to close", color: "green", icon: (typeof getStatCardIcon === "function" ? getStatCardIcon("Ready") : '<svg viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>') },
     ];
 
     return `

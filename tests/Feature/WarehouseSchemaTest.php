@@ -19,6 +19,8 @@ test('warehouse schema includes all requested tables', function () {
         'quality_inspections',
         'notifications',
         'audit_logs',
+        'product_monitor_statuses',
+        'product_monitor_alert_reads',
     ];
 
     foreach ($tables as $table) {
