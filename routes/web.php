@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DistributionController;
 use App\Http\Controllers\ProcurementWorkspaceController;
+use App\Http\Controllers\ProductionWorkspaceController;
 use App\Http\Controllers\SystemAdministratorController;
 use App\Http\Controllers\Warehouse\WarehouseController;
 use App\Http\Controllers\WarehouseAuthController;
@@ -33,7 +34,7 @@ Route::prefix('product-monitor')->group(function () {
     });
 
     Route::get('screens/{screen}.js', function (string $screen) {
-        abort_unless(in_array($screen, ['auth', 'dashboard', 'inventory', 'operations', 'alerts', 'settings', 'role-dashboard', 'sales-and-distribution-staff', 'system-administrator', 'warehouse-staff', 'procurement-staff'], true), 404);
+        abort_unless(in_array($screen, ['auth', 'dashboard', 'inventory', 'operations', 'alerts', 'settings', 'role-dashboard', 'sales-and-distribution-staff', 'system-administrator', 'warehouse-staff', 'procurement-staff', 'production-staff'], true), 404);
 
         return response()->file(base_path("product-monitor/screens/{$screen}.js"), [
             'Content-Type' => 'text/javascript; charset=UTF-8',
@@ -81,6 +82,17 @@ Route::prefix('warehouse/procurement')->name('warehouse.procurement.')->middlewa
     Route::post('deliveries', [ProcurementWorkspaceController::class, 'storeDelivery'])->name('deliveries.store');
     Route::post('deliveries/{delivery}/receipts', [ProcurementWorkspaceController::class, 'storeReceipt'])->name('deliveries.receipts.store');
     Route::get('reports', [ProcurementWorkspaceController::class, 'reports'])->name('reports');
+});
+
+Route::prefix('warehouse/production')->name('warehouse.production.')->middleware('auth')->group(function () {
+    Route::get('dashboard', [ProductionWorkspaceController::class, 'dashboard'])->name('dashboard');
+    Route::get('materials', [ProductionWorkspaceController::class, 'materials'])->name('materials');
+    Route::get('requests', [ProductionWorkspaceController::class, 'requests'])->name('requests');
+    Route::post('requests', [ProductionWorkspaceController::class, 'storeRequest'])->name('requests.store');
+    Route::post('requests/{materialRequest}/decision', [ProductionWorkspaceController::class, 'decideRequest'])->name('requests.decision');
+    Route::post('requests/{materialRequest}/fulfill', [ProductionWorkspaceController::class, 'fulfillRequest'])->name('requests.fulfill');
+    Route::get('issued-materials', [ProductionWorkspaceController::class, 'issuedMaterials'])->name('issued-materials');
+    Route::get('batches', [ProductionWorkspaceController::class, 'batches'])->name('batches');
 });
 
 Route::middleware(['auth'])->group(function () {

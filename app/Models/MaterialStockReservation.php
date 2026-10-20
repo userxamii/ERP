@@ -42,7 +42,16 @@ class MaterialStockReservation extends Model
 
     public function save(array $options = []): bool
     {
-        return DB::transaction(fn (): bool => parent::save($options));
+        return DB::transaction(function () use ($options): bool {
+            if (! $this->exists) {
+                Material::query()
+                    ->whereKey($this->material_id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+            }
+
+            return parent::save($options);
+        });
     }
 
     public function material(): BelongsTo
