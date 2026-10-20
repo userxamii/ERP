@@ -8,6 +8,7 @@ import { salesDistributionStaff } from './screens/sales-and-distribution-staff.j
 import { systemAdministrator } from './screens/system-administrator.js?v=admin-functions-3';
 import { warehouseStaff } from './screens/warehouse-staff.js';
 import { procurementStaff } from './screens/procurement-staff.js?v=procurement-functions-3';
+import { productionStaff } from './screens/production-staff.js?v=production-functions-1';
 
 window.salesDistributionStaff = salesDistributionStaff;
 window.renderLoginPage = renderLoginScreen;
@@ -17,6 +18,10 @@ const pageHandlers = {
     dashboard: () => {
         if (window.authState && window.authState.role === 'Procurement Staff') {
             return renderProcurementDashboardScreen();
+        }
+
+        if (window.authState && window.authState.role === 'Production Staff') {
+            return productionStaff.renderDashboard();
         }
 
         if (window.authState && window.authState.role === 'Sales & Distribution Staff') {
@@ -39,6 +44,10 @@ const pageHandlers = {
     'procurement-suppliers': () => procurementStaff.renderScreen('procurement-suppliers'),
     'procurement-deliveries': () => procurementStaff.renderScreen('procurement-deliveries'),
     'procurement-reports': () => procurementStaff.renderScreen('procurement-reports'),
+    'production-materials': () => productionStaff.renderScreen('production-materials'),
+    'production-requests': () => productionStaff.renderScreen('production-requests'),
+    'production-issued': () => productionStaff.renderScreen('production-issued'),
+    'production-batches': () => productionStaff.renderScreen('production-batches'),
     inventory: () => renderInventoryScreen('inventory'),
     aging: () => renderInventoryScreen('aging'),
     expiring: () => renderInventoryScreen('expiring'),
@@ -83,8 +92,12 @@ function applyScreenRouting() {
 
             if (safePage === 'dashboard' && window.authState?.role === 'Procurement Staff') {
                 procurementStaff.loadScreen('dashboard', target);
+            } else if (safePage === 'dashboard' && window.authState?.role === 'Production Staff') {
+                productionStaff.loadScreen('dashboard', target);
             } else if (safePage.startsWith('procurement-')) {
                 procurementStaff.loadScreen(safePage, target);
+            } else if (safePage.startsWith('production-')) {
+                productionStaff.loadScreen(safePage, target);
             }
 
             return;

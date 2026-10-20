@@ -117,17 +117,33 @@ const pageMetadata = {
         title: "Procurement Reports",
         subtitle: "Review replenishment history, material demand, delivery delays, and stock risks.",
     },
+    "production-materials": {
+        title: "Available Materials",
+        subtitle: "Check usable quantities, QA status, lot numbers, expiry dates, and warehouse locations.",
+    },
+    "production-requests": {
+        title: "Material Requests",
+        subtitle: "Submit production requirements and track approval and warehouse fulfillment.",
+    },
+    "production-issued": {
+        title: "Issued Materials",
+        subtitle: "Review material batches issued to production and their remaining balance.",
+    },
+    "production-batches": {
+        title: "Batch Availability & Expiration",
+        subtitle: "Use FEFO recommendations while respecting quality and material eligibility.",
+    },
 };
 
 const rolePermissions = {
-    "Warehouse Staff": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
+    "Warehouse Staff": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings", "production-requests"],
     "Procurement Staff": ["dashboard", "inventory", "operations", "alerts", "settings", "procurement-materials", "procurement-requests", "procurement-suppliers", "procurement-deliveries", "procurement-reports"],
-    "Production Staff": ["dashboard", "inventory", "operations", "alerts", "settings"],
+    "Production Staff": ["dashboard", "inventory", "operations", "alerts", "settings", "production-materials", "production-requests", "production-issued", "production-batches"],
     "Sales & Distribution Staff": ["dashboard", "expiring", "operations", "alerts", "settings"],
     "Quality Assurance (QA)": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
     "Finance Staff": ["dashboard", "operations", "alerts", "settings"],
-    "Management": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings", "procurement-requests"],
-    "System Administrator": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings", "admin-users", "procurement-requests"],
+    "Management": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings", "procurement-requests", "production-requests"],
+    "System Administrator": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings", "admin-users", "procurement-requests", "production-requests"],
 };
 
 const roleHighlights = {
@@ -805,10 +821,11 @@ async function sendWorkspaceRequest(endpoint, data, method = "POST") {
         const validationMessage = Object.values(payload.errors || {}).flat()[0];
         throw new Error(validationMessage || payload.message || `The request failed (${response.status}).`);
     }
-    window.sendWorkspaceRequest = sendWorkspaceRequest;
 
     return payload;
 }
+
+window.sendWorkspaceRequest = sendWorkspaceRequest;
 
 function applyWorkspaceState(workspaceState) {
     Object.entries(workspaceState.productStatuses).forEach(([productId, status]) => {

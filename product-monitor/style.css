@@ -617,6 +617,8 @@ body {
 }
 
 .sidebar-user .avatar {
+    display: grid;
+    place-items: center;
     width: 34px;
     height: 34px;
     flex: 0 0 auto;
@@ -701,6 +703,8 @@ body {
 }
 
 .profile .avatar {
+    display: grid;
+    place-items: center;
     width: 36px;
     height: 36px;
     flex: 0 0 auto;
@@ -1720,6 +1724,8 @@ body:not(.authenticated) .page-content {
 }
 
 .profile .avatar {
+    display: grid;
+    place-items: center;
     width: 37px;
     height: 37px;
 }
@@ -3741,3 +3747,108 @@ body[data-role="Procurement Staff"] .text-link:focus-visible {
         text-align: center;
     }
 }
+
+    .production-workspace {
+        display: grid;
+        gap: 16px;
+    }
+
+    .production-metrics {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .production-metric {
+        display: grid;
+        align-content: start;
+        gap: 7px;
+        min-width: 0;
+        margin: 0;
+        padding: 16px;
+    }
+
+    .production-metric > span,
+    .production-metric > small {
+        color: #64748b;
+        font-size: 10px;
+        line-height: 1.45;
+    }
+
+    .production-metric > strong {
+        color: #172554;
+        font-size: 25px;
+        line-height: 1;
+    }
+
+    .production-panel {
+        min-width: 0;
+        margin: 0;
+    }
+
+    .production-panel .data-table {
+        min-width: 900px;
+    }
+
+    .production-panel .data-table td {
+        vertical-align: top;
+    }
+
+    .production-shortcuts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+    }
+
+    .production-note {
+        margin: 0;
+        padding: 11px 13px;
+        border-left: 3px solid #60a5fa;
+        border-radius: 0 8px 8px 0;
+        background: #f8fbff;
+        color: #52637d;
+        font-size: 11px;
+        line-height: 1.55;
+    }
+
+    .production-decision-notes,
+    .production-fulfillment-form input,
+    .production-fulfillment-form select {
+        width: 100%;
+        min-width: 145px;
+        margin: 2px 0;
+        padding: 8px;
+        border: 1px solid #d8dde2;
+        border-radius: 7px;
+        background: #fff;
+        color: #202327;
+        font: inherit;
+        font-size: 11px;
+    }
+
+    .production-fulfillment-form {
+        display: grid;
+        min-width: 175px;
+        gap: 5px;
+    }
+
+    .production-action-status {
+        margin: 0;
+    }
+
+    @media (max-width: 960px) {
+        .production-metrics {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 680px) {
+        .production-metrics {
+            grid-template-columns: 1fr;
+        }
+
+        .production-shortcuts {
+            align-items: stretch;
+            flex-direction: column;
+        }
+    }
