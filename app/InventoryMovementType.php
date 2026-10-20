@@ -8,4 +8,6 @@ enum InventoryMovementType: string
     case GoodsReceiptRejected = 'goods_receipt_rejected';
     case ReservationCreated = 'reservation_created';
     case ReservationReleased = 'reservation_released';
+    case WarehouseReceipt = 'warehouse_receipt';
+    case StockOut = 'stock_out';
 }

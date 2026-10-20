@@ -5,8 +5,12 @@ import { renderAlertsScreen } from './screens/alerts.js';
 import { renderSettingsScreen } from './screens/settings.js';
 import { renderLoginScreen, renderSignupScreen } from './screens/auth.js';
 import { salesDistributionStaff } from './screens/sales-and-distribution-staff.js';
+import { systemAdministrator } from './screens/system-administrator.js?v=admin-functions-3';
+import { warehouseStaff } from './screens/warehouse-staff.js';
 
 window.salesDistributionStaff = salesDistributionStaff;
+window.renderLoginPage = renderLoginScreen;
+window.renderSignupPage = renderSignupScreen;
 
 const pageHandlers = {
     dashboard: () => {
@@ -14,8 +18,21 @@ const pageHandlers = {
             return renderProcurementDashboardScreen();
         }
 
+        if (window.authState && window.authState.role === 'Sales & Distribution Staff') {
+            return salesDistributionStaff.renderDashboard();
+        }
+
+        if (window.authState && window.authState.role === 'Warehouse Staff') {
+            return warehouseStaff.renderDashboard();
+        }
+
+        if (window.authState && window.authState.role === 'System Administrator') {
+            return systemAdministrator.renderDashboard();
+        }
+
         return renderDashboardScreen();
     },
+    'admin-users': () => systemAdministrator.renderScreen('admin-users'),
     inventory: () => renderInventoryScreen('inventory'),
     aging: () => renderInventoryScreen('aging'),
     expiring: () => renderInventoryScreen('expiring'),
@@ -30,22 +47,38 @@ function applyScreenRouting() {
     }
 
     window.renderPage = function renderPage(page) {
-        window.setCurrentPage(page);
-        const handler = pageHandlers[page] || pageHandlers.dashboard;
+        const safePage = Object.hasOwn(pageHandlers, page) && window.isPageAllowed(page)
+            ? page
+            : 'dashboard';
+
+        if (safePage !== page) {
+            window.location.hash = safePage;
+        }
+
+        window.setCurrentPage(safePage);
+        const handler = pageHandlers[safePage];
         const content = handler();
         const target = window.appView || document.getElementById('appView');
 
         if (target && typeof content === 'string') {
             target.innerHTML = content;
 
-            if (['inventory', 'aging', 'expiring'].includes(page)) {
-                window.renderInventoryRows(page);
+            if (['inventory', 'aging', 'expiring'].includes(safePage)) {
+                window.renderInventoryRows(safePage);
+            }
+
+            if (safePage === 'admin-users') {
+                systemAdministrator.loadUsers(target);
+            }
+
+            if (safePage === 'dashboard' && window.authState?.role === 'System Administrator') {
+                systemAdministrator.loadDashboard(target);
             }
 
             return;
         }
 
-        return window.__legacyRenderPage(page);
+        return window.__legacyRenderPage(safePage);
     };
 
     if (typeof window.showAuthMode === 'function') {

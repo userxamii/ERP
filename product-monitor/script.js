@@ -93,6 +93,10 @@ const pageMetadata = {
         title: "Settings",
         subtitle: "Warehouse staff workspace preferences.",
     },
+    "admin-users": {
+        title: "User Management",
+        subtitle: "Review account information and administration availability.",
+    },
 };
 
 const rolePermissions = {
@@ -103,7 +107,7 @@ const rolePermissions = {
     "Quality Assurance (QA)": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
     "Finance Staff": ["dashboard", "operations", "alerts", "settings"],
     "Management": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
-    "System Administrator": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
+    "System Administrator": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings", "admin-users"],
 };
 
 const roleHighlights = {
@@ -619,16 +623,7 @@ function getAllowedPages() {
     return rolePermissions[authState.role] || ["dashboard"];
 }
 
-function getRoleInitials(role) {
-    const initials = role
-        .split(/\s|\(|\)|&|-/)
-        .filter(Boolean)
-        .map(part => part[0]?.toUpperCase() ?? "")
-        .join("")
-        .slice(0, 2);
-
-    return initials || "WM";
-}
+window.isPageAllowed = page => getAllowedPages().includes(page);
 
 function getNameInitials(name) {
     const words = String(name || "")
@@ -1238,19 +1233,6 @@ function renderProcurementDashboard() {
 }
 
 function renderDashboard() {
-    const totalUnits = inventory.reduce((total, product) => total + product.quantity, 0);
-    const agingCount = inventory.filter(product => (
-        getInventoryAge(product) > 30
-        && getDaysRemaining(product) >= 0
-        && product.status !== "Expired"
-    )).length;
-    const expiringCount = inventory.filter(product => {
-        const daysRemaining = getDaysRemaining(product);
-        return daysRemaining >= 0 && daysRemaining <= 30 && product.status !== "Expired";
-    }).length;
-    const expiredCount = inventory.filter(product => (
-        getDaysRemaining(product) < 0 || product.status === "Expired"
-    )).length;
     const alerts = getActiveAlerts().slice(0, 4);
     const roleSummary = roleHighlights[authState.role] || roleHighlights["Warehouse Staff"];
     const roleCards = getRoleDashboardCards(authState.role);
@@ -2303,5 +2285,7 @@ async function initializeAuthentication() {
         );
     }
 }
+
+window.initializeAuthentication = initializeAuthentication;
 
 window.addEventListener("hashchange", handlePageChange);

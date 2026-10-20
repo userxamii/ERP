@@ -34,7 +34,7 @@ class WarehouseAuthController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'min:2', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'role' => ['required', Rule::in(User::ROLES)],
+            'role' => ['required', Rule::in(array_diff(User::ROLES, ['System Administrator']))],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
