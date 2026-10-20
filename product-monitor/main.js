@@ -5,6 +5,7 @@ import { renderAlertsScreen } from './screens/alerts.js';
 import { renderSettingsScreen } from './screens/settings.js';
 import { renderLoginScreen, renderSignupScreen } from './screens/auth.js';
 import { salesDistributionStaff } from './screens/sales-and-distribution-staff.js';
+import { systemAdministrator } from './screens/system-administrator.js?v=admin-functions-3';
 import { warehouseStaff } from './screens/warehouse-staff.js';
 
 window.salesDistributionStaff = salesDistributionStaff;
@@ -25,8 +26,13 @@ const pageHandlers = {
             return warehouseStaff.renderDashboard();
         }
 
+        if (window.authState && window.authState.role === 'System Administrator') {
+            return systemAdministrator.renderDashboard();
+        }
+
         return renderDashboardScreen();
     },
+    'admin-users': () => systemAdministrator.renderScreen('admin-users'),
     inventory: () => renderInventoryScreen('inventory'),
     aging: () => renderInventoryScreen('aging'),
     expiring: () => renderInventoryScreen('expiring'),
@@ -59,6 +65,14 @@ function applyScreenRouting() {
 
             if (['inventory', 'aging', 'expiring'].includes(safePage)) {
                 window.renderInventoryRows(safePage);
+            }
+
+            if (safePage === 'admin-users') {
+                systemAdministrator.loadUsers(target);
+            }
+
+            if (safePage === 'dashboard' && window.authState?.role === 'System Administrator') {
+                systemAdministrator.loadDashboard(target);
             }
 
             return;

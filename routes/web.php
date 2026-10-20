@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DistributionController;
+use App\Http\Controllers\SystemAdministratorController;
 use App\Http\Controllers\Warehouse\WarehouseController;
 use App\Http\Controllers\WarehouseAuthController;
 use App\Http\Controllers\WarehouseWorkspaceController;
@@ -31,7 +32,7 @@ Route::prefix('product-monitor')->group(function () {
     });
 
     Route::get('screens/{screen}.js', function (string $screen) {
-        abort_unless(in_array($screen, ['auth', 'dashboard', 'inventory', 'operations', 'alerts', 'settings', 'role-dashboard', 'sales-and-distribution-staff', 'warehouse-staff'], true), 404);
+        abort_unless(in_array($screen, ['auth', 'dashboard', 'inventory', 'operations', 'alerts', 'settings', 'role-dashboard', 'sales-and-distribution-staff', 'system-administrator', 'warehouse-staff'], true), 404);
 
         return response()->file(base_path("product-monitor/screens/{$screen}.js"), [
             'Content-Type' => 'text/javascript; charset=UTF-8',
@@ -54,6 +55,14 @@ Route::prefix('warehouse/workspace')->name('warehouse.workspace.')->middleware('
     Route::post('alerts/{alertId}/read', [WarehouseWorkspaceController::class, 'markAlertRead'])
         ->where('alertId', '[A-Za-z0-9-]+')
         ->name('alerts.read');
+});
+
+Route::prefix('warehouse/admin')->name('warehouse.admin.')->middleware('auth')->group(function () {
+    Route::get('dashboard', [SystemAdministratorController::class, 'dashboard'])->name('dashboard');
+    Route::get('users', [SystemAdministratorController::class, 'users'])->name('users.index');
+    Route::post('users', [SystemAdministratorController::class, 'storeUser'])->name('users.store');
+    Route::patch('users/{user}', [SystemAdministratorController::class, 'updateUser'])->name('users.update');
+    Route::post('users/{user}/password-reset', [SystemAdministratorController::class, 'sendPasswordReset'])->name('users.password-reset');
 });
 
 Route::middleware(['auth'])->group(function () {

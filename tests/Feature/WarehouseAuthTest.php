@@ -41,6 +41,21 @@ test('signup rejects roles that are not offered by the warehouse workspace', fun
     $this->assertDatabaseMissing('users', ['email' => 'invalid-role@example.com']);
 });
 
+test('signup cannot assign the system administrator role', function () {
+    $response = $this->postJson(route('warehouse.auth.register'), [
+        'name' => 'Unauthorized Administrator',
+        'email' => 'untrusted-admin@example.com',
+        'role' => 'System Administrator',
+        'password' => 'warehouse-password',
+        'password_confirmation' => 'warehouse-password',
+    ]);
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors('role');
+
+    $this->assertDatabaseMissing('users', ['email' => 'untrusted-admin@example.com']);
+});
+
 test('sign-in authenticates the saved account and returns its assigned role', function () {
     $user = User::factory()->create([
         'email' => 'qa@example.com',
@@ -58,6 +73,34 @@ test('sign-in authenticates the saved account and returns its assigned role', fu
         ->assertJsonPath('user.role', 'Quality Assurance (QA)');
 
     $this->assertAuthenticatedAs($user);
+});
+
+test('successful and failed warehouse sign-ins are recorded for administrator activity', function () {
+    User::factory()->create([
+        'email' => 'activity@example.com',
+        'password' => 'warehouse-password',
+    ]);
+
+    $this->postJson(route('warehouse.auth.login'), [
+        'email' => 'activity@example.com',
+        'password' => 'warehouse-password',
+    ])->assertOk();
+
+    $this->postJson(route('warehouse.auth.logout'))->assertOk();
+
+    $this->postJson(route('warehouse.auth.login'), [
+        'email' => 'activity@example.com',
+        'password' => 'incorrect-password',
+    ])->assertUnprocessable();
+
+    $this->assertDatabaseHas('system_activities', [
+        'event_type' => 'login_succeeded',
+        'description' => 'User signed in.',
+    ]);
+    $this->assertDatabaseHas('system_activities', [
+        'event_type' => 'login_failed',
+        'description' => 'Failed sign-in attempt.',
+    ]);
 });
 
 test('sign-in rejects an incorrect password without starting a session', function () {
