@@ -97,17 +97,37 @@ const pageMetadata = {
         title: "User Management",
         subtitle: "Review account information and administration availability.",
     },
+    "procurement-materials": {
+        title: "Material Requirements",
+        subtitle: "Review available, reserved, inbound, and replenishment quantities.",
+    },
+    "procurement-requests": {
+        title: "Purchase Requests & Orders",
+        subtitle: "Track requests through approval and convert approved demand into supplier orders.",
+    },
+    "procurement-suppliers": {
+        title: "Suppliers",
+        subtitle: "Review supplier contacts, terms, order history, and delivery performance.",
+    },
+    "procurement-deliveries": {
+        title: "Deliveries",
+        subtitle: "Track expected arrivals, received quantities, batch lots, and discrepancies.",
+    },
+    "procurement-reports": {
+        title: "Procurement Reports",
+        subtitle: "Review replenishment history, material demand, delivery delays, and stock risks.",
+    },
 };
 
 const rolePermissions = {
     "Warehouse Staff": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
-    "Procurement Staff": ["dashboard", "inventory", "operations", "alerts", "settings"],
+    "Procurement Staff": ["dashboard", "inventory", "operations", "alerts", "settings", "procurement-materials", "procurement-requests", "procurement-suppliers", "procurement-deliveries", "procurement-reports"],
     "Production Staff": ["dashboard", "inventory", "operations", "alerts", "settings"],
     "Sales & Distribution Staff": ["dashboard", "expiring", "operations", "alerts", "settings"],
     "Quality Assurance (QA)": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
     "Finance Staff": ["dashboard", "operations", "alerts", "settings"],
-    "Management": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
-    "System Administrator": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings", "admin-users"],
+    "Management": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings", "procurement-requests"],
+    "System Administrator": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings", "admin-users", "procurement-requests"],
 };
 
 const roleHighlights = {
@@ -785,6 +805,7 @@ async function sendWorkspaceRequest(endpoint, data, method = "POST") {
         const validationMessage = Object.values(payload.errors || {}).flat()[0];
         throw new Error(validationMessage || payload.message || `The request failed (${response.status}).`);
     }
+    window.sendWorkspaceRequest = sendWorkspaceRequest;
 
     return payload;
 }
@@ -1989,6 +2010,7 @@ function showToast(message) {
     toast.classList.add("visible");
     toastTimeout = setTimeout(() => toast.classList.remove("visible"), 2800);
 }
+window.showToast = showToast;
 
 function handlePageChange() {
     if (!authState.isAuthenticated) {

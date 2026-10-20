@@ -7,6 +7,7 @@ import { renderLoginScreen, renderSignupScreen } from './screens/auth.js';
 import { salesDistributionStaff } from './screens/sales-and-distribution-staff.js';
 import { systemAdministrator } from './screens/system-administrator.js?v=admin-functions-3';
 import { warehouseStaff } from './screens/warehouse-staff.js';
+import { procurementStaff } from './screens/procurement-staff.js?v=procurement-functions-3';
 
 window.salesDistributionStaff = salesDistributionStaff;
 window.renderLoginPage = renderLoginScreen;
@@ -33,6 +34,11 @@ const pageHandlers = {
         return renderDashboardScreen();
     },
     'admin-users': () => systemAdministrator.renderScreen('admin-users'),
+    'procurement-materials': () => procurementStaff.renderScreen('procurement-materials'),
+    'procurement-requests': () => procurementStaff.renderScreen('procurement-requests'),
+    'procurement-suppliers': () => procurementStaff.renderScreen('procurement-suppliers'),
+    'procurement-deliveries': () => procurementStaff.renderScreen('procurement-deliveries'),
+    'procurement-reports': () => procurementStaff.renderScreen('procurement-reports'),
     inventory: () => renderInventoryScreen('inventory'),
     aging: () => renderInventoryScreen('aging'),
     expiring: () => renderInventoryScreen('expiring'),
@@ -73,6 +79,12 @@ function applyScreenRouting() {
 
             if (safePage === 'dashboard' && window.authState?.role === 'System Administrator') {
                 systemAdministrator.loadDashboard(target);
+            }
+
+            if (safePage === 'dashboard' && window.authState?.role === 'Procurement Staff') {
+                procurementStaff.loadScreen('dashboard', target);
+            } else if (safePage.startsWith('procurement-')) {
+                procurementStaff.loadScreen(safePage, target);
             }
 
             return;

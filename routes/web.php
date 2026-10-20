@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DistributionController;
+use App\Http\Controllers\ProcurementWorkspaceController;
 use App\Http\Controllers\SystemAdministratorController;
 use App\Http\Controllers\Warehouse\WarehouseController;
 use App\Http\Controllers\WarehouseAuthController;
@@ -32,7 +33,7 @@ Route::prefix('product-monitor')->group(function () {
     });
 
     Route::get('screens/{screen}.js', function (string $screen) {
-        abort_unless(in_array($screen, ['auth', 'dashboard', 'inventory', 'operations', 'alerts', 'settings', 'role-dashboard', 'sales-and-distribution-staff', 'system-administrator', 'warehouse-staff'], true), 404);
+        abort_unless(in_array($screen, ['auth', 'dashboard', 'inventory', 'operations', 'alerts', 'settings', 'role-dashboard', 'sales-and-distribution-staff', 'system-administrator', 'warehouse-staff', 'procurement-staff'], true), 404);
 
         return response()->file(base_path("product-monitor/screens/{$screen}.js"), [
             'Content-Type' => 'text/javascript; charset=UTF-8',
@@ -63,6 +64,23 @@ Route::prefix('warehouse/admin')->name('warehouse.admin.')->middleware('auth')->
     Route::post('users', [SystemAdministratorController::class, 'storeUser'])->name('users.store');
     Route::patch('users/{user}', [SystemAdministratorController::class, 'updateUser'])->name('users.update');
     Route::post('users/{user}/password-reset', [SystemAdministratorController::class, 'sendPasswordReset'])->name('users.password-reset');
+});
+
+Route::prefix('warehouse/procurement')->name('warehouse.procurement.')->middleware('auth')->group(function () {
+    Route::get('dashboard', [ProcurementWorkspaceController::class, 'dashboard'])->name('dashboard');
+    Route::get('materials', [ProcurementWorkspaceController::class, 'materials'])->name('materials');
+    Route::get('requests', [ProcurementWorkspaceController::class, 'requests'])->name('requests');
+    Route::post('requests', [ProcurementWorkspaceController::class, 'storeRequest'])->name('requests.store');
+    Route::post('requests/{purchaseRequest}/submit', [ProcurementWorkspaceController::class, 'submitRequest'])->name('requests.submit');
+    Route::post('requests/{purchaseRequest}/decision', [ProcurementWorkspaceController::class, 'decideRequest'])->name('requests.decision');
+    Route::post('orders', [ProcurementWorkspaceController::class, 'storeOrder'])->name('orders.store');
+    Route::post('orders/{purchaseOrder}/place', [ProcurementWorkspaceController::class, 'placeOrder'])->name('orders.place');
+    Route::get('suppliers', [ProcurementWorkspaceController::class, 'suppliers'])->name('suppliers');
+    Route::post('suppliers', [ProcurementWorkspaceController::class, 'storeSupplier'])->name('suppliers.store');
+    Route::get('deliveries', [ProcurementWorkspaceController::class, 'deliveries'])->name('deliveries');
+    Route::post('deliveries', [ProcurementWorkspaceController::class, 'storeDelivery'])->name('deliveries.store');
+    Route::post('deliveries/{delivery}/receipts', [ProcurementWorkspaceController::class, 'storeReceipt'])->name('deliveries.receipts.store');
+    Route::get('reports', [ProcurementWorkspaceController::class, 'reports'])->name('reports');
 });
 
 Route::middleware(['auth'])->group(function () {

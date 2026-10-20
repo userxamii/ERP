@@ -13,6 +13,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(ProcurementProductSeeder::class);
+
         User::query()->firstOrCreate(
             ['email' => 'test@example.com'],
             [
