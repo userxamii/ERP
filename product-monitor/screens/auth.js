@@ -1,5 +1,6 @@
 function renderAccountOptions() {
     return Object.keys(rolePermissions)
+        .filter(role => role !== "System Administrator")
         .map(role => `<option value="${escapeHTML(role)}">${escapeHTML(role)}</option>`)
         .join("");
 }

@@ -93,6 +93,10 @@ const pageMetadata = {
         title: "Settings",
         subtitle: "Warehouse staff workspace preferences.",
     },
+    "admin-users": {
+        title: "User Management",
+        subtitle: "Review account information and administration availability.",
+    },
 };
 
 const rolePermissions = {
@@ -103,7 +107,7 @@ const rolePermissions = {
     "Quality Assurance (QA)": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
     "Finance Staff": ["dashboard", "operations", "alerts", "settings"],
     "Management": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
-    "System Administrator": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
+    "System Administrator": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings", "admin-users"],
 };
 
 const roleHighlights = {

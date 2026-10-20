@@ -23,10 +23,23 @@ test('includes the operations page in the warehouse workspace navigation', funct
 });
 
 test('serves separated warehouse screen modules', function () {
-    expect(file_get_contents(base_path('product-monitor/index.html')))
+    $indexHtml = file_get_contents(base_path('product-monitor/index.html'));
+    $administratorScreen = file_get_contents(base_path('product-monitor/screens/system-administrator.js'));
+
+    expect($indexHtml)
         ->toContain('/product-monitor/screens/auth.js')
         ->toContain('/product-monitor/screens/sales-and-distribution-staff.js')
+        ->toContain('/product-monitor/screens/system-administrator.js')
         ->toContain('/product-monitor/screens/warehouse-staff.js');
+
+    expect($administratorScreen)
+        ->toContain('ACCOUNT DIRECTORY')
+        ->toContain('Email / Username')
+        ->not->toContain('admin-master-data')
+        ->not->toContain('admin-warehouse-settings')
+        ->not->toContain('admin-alert-settings')
+        ->not->toContain('admin-audit-log')
+        ->not->toContain('admin-system-settings');
 
     $this->get('/product-monitor/screens/sales-and-distribution-staff.js')
         ->assertOk()
@@ -37,6 +50,10 @@ test('serves separated warehouse screen modules', function () {
         ->assertHeader('Content-Type', 'text/javascript; charset=UTF-8');
 
     $this->get('/product-monitor/screens/role-dashboard.js')
+        ->assertOk()
+        ->assertHeader('Content-Type', 'text/javascript; charset=UTF-8');
+
+    $this->get('/product-monitor/screens/system-administrator.js')
         ->assertOk()
         ->assertHeader('Content-Type', 'text/javascript; charset=UTF-8');
 });

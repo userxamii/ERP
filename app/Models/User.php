@@ -11,6 +11,10 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+    protected $attributes = [
+        'is_active' => true,
+    ];
+
     public const ROLES = [
         'Warehouse Staff',
         'Procurement Staff',
@@ -35,6 +39,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'department',
+        'is_active',
     ];
 
     /**
@@ -57,6 +63,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
