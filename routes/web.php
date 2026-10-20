@@ -64,7 +64,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('admin', function () {
         return Inertia::render('admin/index');
     })->name('admin');
-
     // Warehouse Staff Dashboard Routes
     Route::prefix('warehouse')->name('warehouse.')->group(function () {
         Route::get('/dashboard', [WarehouseController::class, 'index'])->name('dashboard');
