@@ -133,6 +133,10 @@ const pageMetadata = {
         title: "Batch Availability & Expiration",
         subtitle: "Use FEFO recommendations while respecting quality and material eligibility.",
     },
+    "management-workspace": {
+        title: "Management Workspace",
+        subtitle: "Review executive inventory performance, department reports, risks, and decisions.",
+    },
 };
 
 const rolePermissions = {
@@ -142,8 +146,8 @@ const rolePermissions = {
     "Sales & Distribution Staff": ["dashboard", "expiring", "operations", "alerts", "settings"],
     "Quality Assurance (QA)": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
     "Finance Staff": ["dashboard", "operations", "alerts", "settings"],
-    "Management": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings", "procurement-requests", "production-requests"],
-    "System Administrator": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings", "admin-users", "procurement-requests", "production-requests"],
+    "Management": ["dashboard", "management-workspace", "inventory", "aging", "expiring", "operations", "alerts", "settings", "procurement-requests", "production-requests"],
+    "System Administrator": ["dashboard", "management-workspace", "inventory", "aging", "expiring", "operations", "alerts", "settings", "admin-users", "procurement-requests", "production-requests"],
 };
 
 const roleHighlights = {

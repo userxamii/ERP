@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DistributionController;
+use App\Http\Controllers\ManagementWorkspaceController;
 use App\Http\Controllers\ProcurementWorkspaceController;
 use App\Http\Controllers\ProductionWorkspaceController;
 use App\Http\Controllers\SystemAdministratorController;
@@ -34,7 +35,7 @@ Route::prefix('product-monitor')->group(function () {
     });
 
     Route::get('screens/{screen}.js', function (string $screen) {
-        abort_unless(in_array($screen, ['auth', 'dashboard', 'inventory', 'operations', 'alerts', 'settings', 'role-dashboard', 'sales-and-distribution-staff', 'system-administrator', 'warehouse-staff', 'procurement-staff', 'production-staff'], true), 404);
+        abort_unless(in_array($screen, ['auth', 'dashboard', 'inventory', 'operations', 'alerts', 'settings', 'role-dashboard', 'sales-and-distribution-staff', 'system-administrator', 'warehouse-staff', 'procurement-staff', 'production-staff', 'management'], true), 404);
 
         return response()->file(base_path("product-monitor/screens/{$screen}.js"), [
             'Content-Type' => 'text/javascript; charset=UTF-8',
@@ -93,6 +94,10 @@ Route::prefix('warehouse/production')->name('warehouse.production.')->middleware
     Route::post('requests/{materialRequest}/fulfill', [ProductionWorkspaceController::class, 'fulfillRequest'])->name('requests.fulfill');
     Route::get('issued-materials', [ProductionWorkspaceController::class, 'issuedMaterials'])->name('issued-materials');
     Route::get('batches', [ProductionWorkspaceController::class, 'batches'])->name('batches');
+});
+
+Route::prefix('warehouse/management')->name('warehouse.management.')->middleware('auth')->group(function () {
+    Route::get('dashboard', [ManagementWorkspaceController::class, 'dashboard'])->name('dashboard');
 });
 
 Route::middleware(['auth'])->group(function () {

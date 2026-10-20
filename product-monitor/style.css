@@ -3852,3 +3852,249 @@ body[data-role="Procurement Staff"] .text-link:focus-visible {
             flex-direction: column;
         }
     }
+
+.management-workspace {
+    display: grid;
+    gap: 16px;
+}
+
+.management-filters {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+    align-items: end;
+    gap: 10px;
+    padding: 16px;
+    border: 1px solid #e1e5e9;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.management-filters label,
+.management-export label {
+    display: grid;
+    gap: 6px;
+    color: #5d6878;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.management-filters input,
+.management-filters select,
+.management-export select {
+    min-width: 0;
+    height: 36px;
+    padding: 0 9px;
+    border: 1px solid #d8dde2;
+    border-radius: 7px;
+    background: #fff;
+    color: #202327;
+    font: inherit;
+    font-size: 12px;
+}
+
+.management-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.management-metric {
+    display: grid;
+    align-content: start;
+    gap: 7px;
+    min-width: 0;
+    margin: 0;
+    padding: 16px;
+}
+
+.management-metric > span,
+.management-metric > small,
+.management-department-card > small {
+    color: #64748b;
+    font-size: 10px;
+    line-height: 1.45;
+}
+
+.management-metric > strong {
+    color: #172554;
+    font-size: 22px;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.management-panel {
+    min-width: 0;
+    margin: 0;
+}
+
+.management-section {
+    display: grid;
+    scroll-margin-top: 20px;
+    gap: 14px;
+}
+
+.management-two-column {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.management-section-links {
+    position: sticky;
+    z-index: 2;
+    top: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 9px;
+    border: 1px solid #e1e5e9;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.96);
+}
+
+.management-section-links a {
+    padding: 7px 10px;
+    border-radius: 7px;
+    color: #384454;
+    font-size: 11px;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.management-section-links a:hover {
+    background: #f0f3f6;
+}
+
+.management-bars {
+    display: grid;
+    gap: 12px;
+}
+
+.management-bar-row {
+    display: grid;
+    grid-template-columns: minmax(95px, 1fr) minmax(90px, 2fr) auto;
+    align-items: center;
+    gap: 10px;
+    color: #526071;
+    font-size: 11px;
+}
+
+.management-bar-track {
+    height: 9px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #edf0f3;
+}
+
+.management-bar-track i {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #5b6979, #a2adb8);
+}
+
+.management-bar-row strong {
+    color: #252b33;
+    font-variant-numeric: tabular-nums;
+}
+
+.management-department-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.management-department-card {
+    display: grid;
+    align-content: start;
+    gap: 8px;
+    margin: 0;
+    padding: 17px;
+}
+
+.management-department-card h2 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.management-department-card > strong {
+    color: #202938;
+    font-size: 18px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.management-alert {
+    display: grid;
+    gap: 4px;
+    margin: 0 0 9px;
+    padding: 11px 12px;
+    border-left: 3px solid #d1a23f;
+    border-radius: 0 8px 8px 0;
+    background: #fbf8ef;
+    color: #4c4432;
+    font-size: 11px;
+}
+
+.management-alert-critical,
+.management-alert-high {
+    border-left-color: #bd5454;
+    background: #fcf3f3;
+    color: #512f2f;
+}
+
+.management-alert span,
+.management-source-note,
+.management-export-status {
+    color: #64748b;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.management-export {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 10px;
+}
+
+.management-export label {
+    min-width: min(280px, 100%);
+}
+
+.management-source-note {
+    margin: 12px 0 0;
+}
+
+.management-export-status {
+    margin: 8px 0 0;
+}
+
+@media (max-width: 960px) {
+    .management-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .management-metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
+    .management-filters,
+    .management-metric-grid,
+    .management-two-column,
+    .management-department-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .management-section-links {
+        position: static;
+    }
+
+    .management-bar-row {
+        grid-template-columns: minmax(75px, 1fr) minmax(55px, 1.4fr) auto;
+        gap: 7px;
+        font-size: 10px;
+    }
+}

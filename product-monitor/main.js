@@ -9,6 +9,7 @@ import { systemAdministrator } from './screens/system-administrator.js?v=admin-f
 import { warehouseStaff } from './screens/warehouse-staff.js';
 import { procurementStaff } from './screens/procurement-staff.js?v=procurement-functions-3';
 import { productionStaff } from './screens/production-staff.js?v=production-functions-1';
+import { managementWorkspace } from './screens/management.js?v=management-workspace-1';
 
 window.salesDistributionStaff = salesDistributionStaff;
 window.renderLoginPage = renderLoginScreen;
@@ -36,8 +37,13 @@ const pageHandlers = {
             return systemAdministrator.renderDashboard();
         }
 
+        if (window.authState && window.authState.role === 'Management') {
+            return managementWorkspace.renderDashboard();
+        }
+
         return renderDashboardScreen();
     },
+    'management-workspace': () => managementWorkspace.renderDashboard(),
     'admin-users': () => systemAdministrator.renderScreen('admin-users'),
     'procurement-materials': () => procurementStaff.renderScreen('procurement-materials'),
     'procurement-requests': () => procurementStaff.renderScreen('procurement-requests'),
@@ -94,10 +100,14 @@ function applyScreenRouting() {
                 procurementStaff.loadScreen('dashboard', target);
             } else if (safePage === 'dashboard' && window.authState?.role === 'Production Staff') {
                 productionStaff.loadScreen('dashboard', target);
+            } else if (safePage === 'dashboard' && window.authState?.role === 'Management') {
+                managementWorkspace.loadScreen(target);
             } else if (safePage.startsWith('procurement-')) {
                 procurementStaff.loadScreen(safePage, target);
             } else if (safePage.startsWith('production-')) {
                 productionStaff.loadScreen(safePage, target);
+            } else if (safePage === 'management-workspace') {
+                managementWorkspace.loadScreen(target);
             }
 
             return;
