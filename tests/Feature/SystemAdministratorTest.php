@@ -2,12 +2,9 @@
 
 use App\Models\SystemActivity;
 use App\Models\User;
-<<<<<<< HEAD
 use Illuminate\Auth\Notifications\ResetPassword;
-use Illuminate\Support\Facades\Notification;
-=======
 use Illuminate\Support\Facades\Hash;
->>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
+use Illuminate\Support\Facades\Notification;
 
 test('system administrators can view all registered accounts and their roles', function () {
     $administrator = User::factory()->create([
@@ -84,12 +81,7 @@ test('system administrators can view account and system health metrics', functio
         ->assertJsonPath('recentActivity.1.eventType', 'login_failed');
 });
 
-<<<<<<< HEAD
-test('system administrators can create accounts and send password setup links', function () {
-    Notification::fake();
-=======
 test('system administrators can create accounts with a temporary password', function () {
->>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
     $administrator = User::factory()->create([
         'role' => 'System Administrator',
     ]);
@@ -100,11 +92,8 @@ test('system administrators can create accounts with a temporary password', func
             'email' => 'new.staff@example.com',
             'role' => 'Warehouse Staff',
             'department' => 'Warehouse',
-<<<<<<< HEAD
-=======
             'password' => 'temporary-password',
             'must_change_password' => false,
->>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
         ]);
 
     $response->assertCreated()
@@ -112,19 +101,12 @@ test('system administrators can create accounts with a temporary password', func
         ->assertJsonPath('user.role', 'Warehouse Staff')
         ->assertJsonPath('user.department', 'Warehouse')
         ->assertJsonPath('user.isActive', true)
-<<<<<<< HEAD
-        ->assertJsonPath('resetLinkSent', true);
-
-    $newUser = User::query()->where('email', 'new.staff@example.com')->firstOrFail();
-    Notification::assertSentTo($newUser, ResetPassword::class);
-=======
         ->assertJsonPath('message', 'Account created. The user must change this temporary password at first sign-in.')
         ->assertJsonMissingPath('user.password');
 
     $newUser = User::query()->where('email', 'new.staff@example.com')->firstOrFail();
     expect(Hash::check('temporary-password', $newUser->password))->toBeTrue()
         ->and($newUser->must_change_password)->toBeTrue();
->>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
     $this->assertDatabaseHas('system_activities', [
         'actor_user_id' => $administrator->id,
         'user_id' => $newUser->id,
@@ -132,8 +114,6 @@ test('system administrators can create accounts with a temporary password', func
     ]);
 });
 
-<<<<<<< HEAD
-=======
 test('system administrator account creation requires a temporary password', function () {
     $administrator = User::factory()->create([
         'role' => 'System Administrator',
@@ -151,7 +131,6 @@ test('system administrator account creation requires a temporary password', func
     $this->assertDatabaseMissing('users', ['email' => 'missing.password@example.com']);
 });
 
->>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
 test('system administrators can edit and deactivate accounts while preserving history', function () {
     $administrator = User::factory()->create([
         'role' => 'System Administrator',
@@ -213,7 +192,6 @@ test('the last active administrator cannot be deactivated', function () {
     ]);
 });
 
-<<<<<<< HEAD
 test('system administrators can send password reset links for an account', function () {
     Notification::fake();
     $administrator = User::factory()->create([
@@ -227,11 +205,6 @@ test('system administrators can send password reset links for an account', funct
         ->assertJsonPath('message', 'A password reset link has been sent by email.');
 
     Notification::assertSentTo($user, ResetPassword::class);
-=======
-test('administrator account directory no longer exposes password reset action', function () {
-    $this->postJson('/warehouse/admin/users/1/password-reset')
-        ->assertNotFound();
->>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
 });
 
 test('non-administrators cannot access system health or change accounts', function () {
@@ -249,8 +222,6 @@ test('non-administrators cannot access system health or change accounts', functi
             'role' => 'System Administrator',
         ])
         ->assertForbidden();
-<<<<<<< HEAD
-=======
 
     $this->actingAs($user)
         ->postJson(route('warehouse.admin.users.store'), [
@@ -271,7 +242,6 @@ test('guests cannot create accounts through the administrator endpoint', functio
     ])->assertUnauthorized();
 
     $this->assertDatabaseMissing('users', ['email' => 'unauthorized@example.com']);
->>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
 });
 
 test('a trusted console command can promote an existing account to system administrator', function () {

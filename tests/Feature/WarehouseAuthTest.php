@@ -15,21 +15,6 @@ test('warehouse self-registration endpoint is unavailable', function () {
     $this->assertDatabaseMissing('users', ['email' => 'finance@example.com']);
 });
 
-test('signup cannot assign the system administrator role', function () {
-    $response = $this->postJson(route('warehouse.auth.register'), [
-        'name' => 'Unauthorized Administrator',
-        'email' => 'untrusted-admin@example.com',
-        'role' => 'System Administrator',
-        'password' => 'warehouse-password',
-        'password_confirmation' => 'warehouse-password',
-    ]);
-
-    $response->assertUnprocessable()
-        ->assertJsonValidationErrors('role');
-
-    $this->assertDatabaseMissing('users', ['email' => 'untrusted-admin@example.com']);
-});
-
 test('sign-in authenticates the saved account and returns its assigned role', function () {
     $user = User::factory()->create([
         'email' => 'qa@example.com',
@@ -50,8 +35,6 @@ test('sign-in authenticates the saved account and returns its assigned role', fu
     $this->assertAuthenticatedAs($user);
 });
 
-<<<<<<< HEAD
-=======
 test('first sign-in requires changing the temporary password before workspace access', function () {
     $user = User::factory()->create([
         'email' => 'new.staff@example.com',
@@ -133,7 +116,6 @@ test('users who are not required to change their password cannot use the forced-
     ]);
 });
 
->>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
 test('successful and failed warehouse sign-ins are recorded for administrator activity', function () {
     User::factory()->create([
         'email' => 'activity@example.com',

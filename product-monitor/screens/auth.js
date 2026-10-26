@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 function renderAccountOptions() {
     return Object.keys(rolePermissions)
         .filter(role => role !== "System Administrator")
@@ -6,8 +5,6 @@ function renderAccountOptions() {
         .join("");
 }
 
-=======
->>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
 function renderAuthMessage(message, className = "auth-message") {
     return message ? `<p class="${className}" role="status">${escapeHTML(message)}</p>` : "";
 }

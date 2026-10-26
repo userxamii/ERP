@@ -107,11 +107,7 @@ const rolePermissions = {
     "Quality Assurance (QA)": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
     "Finance Staff": ["dashboard", "operations", "alerts", "settings"],
     "Management": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
-<<<<<<< HEAD
-    "System Administrator": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings", "admin-users"],
-=======
     "System Administrator": ["dashboard", "admin-users", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
->>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
 };
 
 const roleHighlights = {

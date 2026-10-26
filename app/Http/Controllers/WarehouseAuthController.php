@@ -30,25 +30,6 @@ class WarehouseAuthController extends Controller
         ])->header('Cache-Control', 'no-store');
     }
 
-<<<<<<< HEAD
-    public function register(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'min:2', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'role' => ['required', Rule::in(array_diff(User::ROLES, ['System Administrator']))],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
-
-        User::query()->create($validated);
-
-        return response()->json([
-            'message' => 'Account created. Sign in with your new email and password.',
-        ], 201);
-    }
-
-=======
->>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
     public function login(LoginRequest $request): JsonResponse
     {
         $request->authenticate();

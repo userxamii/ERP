@@ -5,11 +5,7 @@ import { renderAlertsScreen } from './screens/alerts.js?v=alerts-unread-count-2'
 import { renderSettingsScreen } from './screens/settings.js';
 import { renderChangePasswordScreen, renderLoginScreen } from './screens/auth.js?v=temporary-password-required-1';
 import { salesDistributionStaff } from './screens/sales-and-distribution-staff.js';
-<<<<<<< HEAD
-import { systemAdministrator } from './screens/system-administrator.js?v=admin-functions-3';
-=======
 import { systemAdministrator } from './screens/system-administrator.js?v=temporary-password-required-1';
->>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
 import { warehouseStaff } from './screens/warehouse-staff.js';
 
 window.salesDistributionStaff = salesDistributionStaff;

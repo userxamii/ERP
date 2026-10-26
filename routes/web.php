@@ -1,15 +1,11 @@
 <?php
 
-<<<<<<< HEAD
 use App\Http\Controllers\DistributionController;
-use App\Http\Controllers\SystemAdministratorController;
-use App\Http\Controllers\Warehouse\WarehouseController;
-=======
 use App\Http\Controllers\ManagementWorkspaceController;
 use App\Http\Controllers\ProcurementWorkspaceController;
 use App\Http\Controllers\ProductionWorkspaceController;
 use App\Http\Controllers\SystemAdministratorController;
->>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
+use App\Http\Controllers\Warehouse\WarehouseController;
 use App\Http\Controllers\WarehouseAuthController;
 use App\Http\Controllers\WarehouseWorkspaceController;
 use Illuminate\Support\Facades\Route;
@@ -67,21 +63,12 @@ Route::prefix('warehouse/workspace')->name('warehouse.workspace.')->middleware([
         ->name('alerts.read');
 });
 
-<<<<<<< HEAD
-Route::prefix('warehouse/admin')->name('warehouse.admin.')->middleware('auth')->group(function () {
-=======
 Route::prefix('warehouse/admin')->name('warehouse.admin.')->middleware(['auth', 'password.changed'])->group(function () {
->>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
     Route::get('dashboard', [SystemAdministratorController::class, 'dashboard'])->name('dashboard');
     Route::get('users', [SystemAdministratorController::class, 'users'])->name('users.index');
     Route::post('users', [SystemAdministratorController::class, 'storeUser'])->name('users.store');
     Route::patch('users/{user}', [SystemAdministratorController::class, 'updateUser'])->name('users.update');
-<<<<<<< HEAD
     Route::post('users/{user}/password-reset', [SystemAdministratorController::class, 'sendPasswordReset'])->name('users.password-reset');
-});
-
-Route::middleware(['auth'])->group(function () {
-=======
 });
 
 Route::prefix('warehouse/procurement')->name('warehouse.procurement.')->middleware(['auth', 'password.changed'])->group(function () {
@@ -117,7 +104,6 @@ Route::prefix('warehouse/management')->name('warehouse.management.')->middleware
 });
 
 Route::middleware(['auth', 'password.changed'])->group(function () {
->>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
