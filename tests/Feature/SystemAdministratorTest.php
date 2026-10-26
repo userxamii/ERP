@@ -50,7 +50,7 @@ test('non-administrators cannot view the account directory', function () {
         ->assertForbidden();
 });
 
-test('system administrators can view account and system health metrics', function () {
+test('system administrators can view account activity metrics', function () {
     $administrator = User::factory()->create([
         'role' => 'System Administrator',
     ]);
@@ -73,8 +73,7 @@ test('system administrators can view account and system health metrics', functio
         ->assertJsonPath('metrics.activeUsers', 2)
         ->assertJsonPath('metrics.failedLogins', 1)
         ->assertJsonPath('metrics.successfulLogins', 1)
-        ->assertJsonPath('health.api', 'Operational')
-        ->assertJsonPath('health.database', 'Operational')
+        ->assertJsonMissingPath('health')
         ->assertJsonPath('recentActivity.0.eventType', 'login_succeeded')
         ->assertJsonPath('recentActivity.1.eventType', 'login_failed');
 });

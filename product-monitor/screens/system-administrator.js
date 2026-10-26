@@ -1,5 +1,5 @@
 const adminSections = [
-    { page: "dashboard", label: "Admin Dashboard", description: "System administration overview." },
+    { page: "dashboard", label: "Overview" },
     { page: "admin-users", label: "User Management", description: "Review registered accounts and their roles." },
 ];
 
@@ -31,25 +31,11 @@ function renderAdminDashboard() {
     const roleCount = Object.keys(rolePermissions).length;
 
     return `
-        <section id="adminDashboardStatus" class="admin-table-note" role="status">Loading system overview…</section>
         <section class="stats-grid" aria-label="Administration summary">
             ${renderStatCard("Registered users", "—", "All created accounts", "blue")}
             ${renderStatCard("Active users", "—", `${roleCount} defined application roles`, "green")}
             ${renderStatCard("Successful logins", "—", "Last 24 hours", "orange")}
             ${renderStatCard("Failed login attempts", "—", "Last 24 hours", "red")}
-        </section>
-
-        <section class="panel">
-            <div class="panel-heading">
-                <div>
-                    <p class="eyebrow">SERVICE HEALTH</p>
-                    <h2>API and database status</h2>
-                </div>
-            </div>
-            <div class="admin-status-list">
-                <div><span>Admin API</span><strong id="adminApiHealth" class="admin-status unavailable">Checking</strong></div>
-                <div><span>Database</span><strong id="adminDatabaseHealth" class="admin-status unavailable">Checking</strong></div>
-            </div>
         </section>
 
         <section class="panel">
@@ -220,11 +206,6 @@ function renderAdminActivity(activities) {
 export async function loadSystemAdministratorDashboard(target) {
     try {
         const payload = await administratorRequest("/warehouse/admin/dashboard");
-        const status = target.querySelector("#adminDashboardStatus");
-
-        if (!status) {
-            return;
-        }
 
         const cards = target.querySelectorAll(".stats-grid .stat-card");
         const metricValues = [
@@ -239,27 +220,16 @@ export async function loadSystemAdministratorDashboard(target) {
                 value.textContent = String(metricValues[index] ?? 0);
             }
         });
-        status.textContent = "Updated just now. Login counts cover the last 24 hours.";
-
-        for (const [id, state] of [["adminApiHealth", payload.health.api], ["adminDatabaseHealth", payload.health.database]]) {
-            const indicator = target.querySelector(`#${id}`);
-            if (indicator) {
-                indicator.textContent = state;
-                indicator.classList.toggle("available", state === "Operational");
-                indicator.classList.toggle("unavailable", state !== "Operational");
-            }
-        }
-
         const activity = target.querySelector("#adminRecentActivity");
         if (activity) {
             activity.innerHTML = renderAdminActivity(payload.recentActivity || []);
         }
     } catch (error) {
-        const status = target.querySelector("#adminDashboardStatus");
-        if (status) {
-            status.textContent = error instanceof Error ? error.message : "Unable to load the system overview.";
-            status.classList.add("admin-error");
-        }
+        const status = document.createElement("p");
+        status.className = "admin-table-note admin-error";
+        status.setAttribute("role", "alert");
+        status.textContent = error instanceof Error ? error.message : "Unable to load the system overview.";
+        target.prepend(status);
     }
 }
 
@@ -418,7 +388,7 @@ export function renderSystemAdministratorScreen(page = "dashboard") {
         <div class="admin-workspace">
             <p class="admin-user-success-toast" role="status" aria-live="polite" hidden></p>
             ${renderSectionNavigation(section.page)}
-            ${renderAdminPageHeader(section)}
+            ${section.page === "dashboard" ? "" : renderAdminPageHeader(section)}
             ${renderPage()}
         </div>
     `;

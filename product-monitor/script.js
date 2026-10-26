@@ -794,7 +794,7 @@ function applyAuthState() {
 
     sidebar.hidden = !authState.isAuthenticated || authState.mustChangePassword;
     topbar.hidden = !authState.isAuthenticated || authState.mustChangePassword;
-    document.body.classList.toggle("authenticated", authState.isAuthenticated);
+    document.body.classList.toggle("authenticated", authState.isAuthenticated && !authState.mustChangePassword);
     modalLayer.hidden = true;
     document.body.classList.remove("modal-open");
 

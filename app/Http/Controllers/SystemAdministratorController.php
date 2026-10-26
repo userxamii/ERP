@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\SystemActivity;
 use App\Models\User;
-use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,14 +15,6 @@ class SystemAdministratorController extends Controller
     public function dashboard(Request $request): JsonResponse
     {
         $this->authorizeAdministrator($request);
-
-        try {
-            DB::connection()->select('select 1');
-            $databaseStatus = 'Operational';
-        } catch (QueryException $exception) {
-            report($exception);
-            $databaseStatus = 'Unavailable';
-        }
 
         $recentActivities = SystemActivity::query()
             ->with(['user:id,name', 'actor:id,name'])
@@ -44,10 +35,6 @@ class SystemAdministratorController extends Controller
                     ->whereIn('event_type', ['login_failed', 'login_locked'])
                     ->where('created_at', '>=', now()->subDay())
                     ->count(),
-            ],
-            'health' => [
-                'api' => 'Operational',
-                'database' => $databaseStatus,
             ],
             'recentActivity' => $recentActivities->map(fn (SystemActivity $activity): array => [
                 'id' => $activity->id,
