@@ -53,6 +53,7 @@ final class ProcurementDashboardReport
         $materials = Material::query()
             ->where('is_active', true)
             ->with([
+                'unitOfMeasure:id,code',
                 'inventoryBatches:id,material_id,quantity_on_hand,quality_status,expires_at',
                 'stockReservations:id,material_id,quantity,status',
             ])

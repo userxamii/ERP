@@ -8,7 +8,6 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
@@ -135,24 +134,6 @@ class SystemAdministratorController extends Controller
 
         return response()->json([
             'user' => $this->userData($user->refresh()),
-        ]);
-    }
-
-    public function sendPasswordReset(Request $request, User $user): JsonResponse
-    {
-        $actor = $this->authorizeAdministrator($request);
-        $resetStatus = Password::sendResetLink(['email' => $user->email]);
-
-        if ($resetStatus !== Password::RESET_LINK_SENT) {
-            return response()->json([
-                'message' => 'The password reset email could not be sent.',
-            ], 503);
-        }
-
-        $this->recordActivity($actor, $user, 'password_reset_requested', "Requested a password reset for {$user->email}.");
-
-        return response()->json([
-            'message' => 'A password reset link has been sent by email.',
         ]);
     }
 

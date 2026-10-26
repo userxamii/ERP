@@ -1072,6 +1072,8 @@ body {
 }
 
 .sidebar-user .avatar {
+    display: grid;
+    place-items: center;
     width: 34px;
     height: 34px;
     flex: 0 0 auto;
@@ -1176,6 +1178,8 @@ body {
 }
 
 .profile .avatar {
+    display: grid;
+    place-items: center;
     width: 36px;
     height: 36px;
     flex: 0 0 auto;
@@ -2295,6 +2299,8 @@ body:not(.authenticated) .page-content {
 }
 
 .profile .avatar {
+    display: grid;
+    place-items: center;
     width: 37px;
     height: 37px;
     background: var(--green);
@@ -4331,6 +4337,123 @@ body[data-role="Procurement Staff"] .text-link:focus-visible {
     white-space: nowrap;
 }
 
+.procurement-panel {
+    margin-top: 18px;
+}
+
+.procurement-metric-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.procurement-metric-card {
+    min-height: 104px;
+}
+
+.procurement-metric-copy {
+    display: grid;
+    align-content: center;
+    gap: 6px;
+}
+
+.procurement-metric-copy small {
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.procurement-metric-copy strong {
+    color: #172554;
+    font-size: 24px;
+    line-height: 1;
+}
+
+.procurement-metric-copy span {
+    color: #64748b;
+    font-size: 10px;
+    line-height: 1.45;
+}
+
+.procurement-form-details {
+    margin: 14px 0;
+}
+
+.procurement-form-details > summary {
+    display: inline-flex;
+    cursor: pointer;
+    list-style: none;
+}
+
+.procurement-form-details > summary::-webkit-details-marker {
+    display: none;
+}
+
+.procurement-form {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+    padding: 16px;
+    border: 1px solid #dfe7f1;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.procurement-form label {
+    display: grid;
+    min-width: 0;
+    gap: 6px;
+    color: #4f5862;
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.procurement-form input,
+.procurement-form select,
+.procurement-form textarea {
+    width: 100%;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid #d8dde2;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #202327;
+    font: inherit;
+    font-weight: 400;
+}
+
+.procurement-form textarea {
+    min-height: 70px;
+    resize: vertical;
+}
+
+.procurement-form-wide {
+    grid-column: 1 / -1;
+}
+
+.procurement-form > button {
+    align-self: end;
+    justify-self: start;
+}
+
+.procurement-panel .data-table {
+    min-width: 940px;
+}
+
+.procurement-panel .activity-item small {
+    margin-left: auto;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+.procurement-panel .activity-item {
+    align-items: flex-start;
+}
+
+.procurement-panel .admin-status {
+    white-space: nowrap;
+}
+
 @media (max-width: 960px) {
     .procurement-metric-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4342,6 +4465,14 @@ body[data-role="Procurement Staff"] .text-link:focus-visible {
 }
 
 @media (max-width: 680px) {
+    .procurement-form {
+        grid-template-columns: 1fr;
+    }
+
+    .procurement-form-wide {
+        grid-column: auto;
+    }
+
     .procurement-briefing {
         align-items: stretch;
         flex-direction: column;

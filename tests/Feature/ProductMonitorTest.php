@@ -154,7 +154,8 @@ test('serves separated warehouse screen modules', function () {
         ->toContain('/product-monitor/screens/auth.js')
         ->toContain('/product-monitor/screens/sales-and-distribution-staff.js')
         ->toContain('/product-monitor/screens/system-administrator.js')
-        ->toContain('/product-monitor/screens/warehouse-staff.js');
+        ->toContain('/product-monitor/screens/warehouse-staff.js')
+        ->toContain('/product-monitor/screens/procurement-staff.js');
 
     expect($administratorScreen)
         ->toContain('ACCOUNT DIRECTORY')
@@ -180,6 +181,10 @@ test('serves separated warehouse screen modules', function () {
     $this->get('/product-monitor/screens/system-administrator.js')
         ->assertOk()
         ->assertHeader('Content-Type', 'text/javascript; charset=UTF-8');
+
+    $this->get('/product-monitor/screens/procurement-staff.js')
+        ->assertOk()
+        ->assertHeader('Content-Type', 'text/javascript; charset=UTF-8');
 });
 
 test('includes screen icons across warehouse pages and navigation', function () {
@@ -192,7 +197,12 @@ test('includes screen icons across warehouse pages and navigation', function () 
         ->toContain('data-page="expiring"')
         ->toContain('data-page="operations"')
         ->toContain('data-page="alerts"')
-        ->toContain('data-page="settings"');
+        ->toContain('data-page="settings"')
+        ->toContain('data-page="procurement-materials"')
+        ->toContain('data-page="procurement-requests"')
+        ->toContain('data-page="procurement-suppliers"')
+        ->toContain('data-page="procurement-deliveries"')
+        ->toContain('data-page="procurement-reports"');
 
     expect(file_get_contents(base_path('product-monitor/screens/role-dashboard.js')))
         ->toContain('getStatCardIcon');

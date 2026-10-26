@@ -35,7 +35,7 @@ Route::prefix('product-monitor')->group(function () {
     });
 
     Route::get('screens/{screen}.js', function (string $screen) {
-        abort_unless(in_array($screen, ['auth', 'dashboard', 'inventory', 'operations', 'alerts', 'settings', 'role-dashboard', 'sales-and-distribution-staff', 'system-administrator', 'warehouse-staff'], true), 404);
+        abort_unless(in_array($screen, ['auth', 'dashboard', 'inventory', 'operations', 'alerts', 'settings', 'role-dashboard', 'sales-and-distribution-staff', 'system-administrator', 'warehouse-staff', 'procurement-staff', 'production-staff', 'management'], true), 404);
 
         return response()->file(base_path("product-monitor/screens/{$screen}.js"), [
             'Content-Type' => 'text/javascript; charset=UTF-8',
@@ -68,7 +68,6 @@ Route::prefix('warehouse/admin')->name('warehouse.admin.')->middleware(['auth', 
     Route::get('users', [SystemAdministratorController::class, 'users'])->name('users.index');
     Route::post('users', [SystemAdministratorController::class, 'storeUser'])->name('users.store');
     Route::patch('users/{user}', [SystemAdministratorController::class, 'updateUser'])->name('users.update');
-    Route::post('users/{user}/password-reset', [SystemAdministratorController::class, 'sendPasswordReset'])->name('users.password-reset');
 });
 
 Route::prefix('warehouse/procurement')->name('warehouse.procurement.')->middleware(['auth', 'password.changed'])->group(function () {

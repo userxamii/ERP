@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0F3D3A">
     <title>User Screens & Role Requirements</title>
-    <link rel="stylesheet" href="/product-monitor/style.css?v=distribution-admin-merge-1">
+    <link rel="stylesheet" href="/product-monitor/style.css?v=erp-workflow-merge-1">
     <link rel="modulepreload" href="/product-monitor/screens/auth.js?v=temporary-password-required-1">
     <link rel="modulepreload" href="/product-monitor/screens/dashboard.js">
     <link rel="modulepreload" href="/product-monitor/screens/inventory.js">
@@ -15,6 +15,9 @@
     <link rel="modulepreload" href="/product-monitor/screens/sales-and-distribution-staff.js">
     <link rel="modulepreload" href="/product-monitor/screens/system-administrator.js?v=temporary-password-required-1">
     <link rel="modulepreload" href="/product-monitor/screens/warehouse-staff.js">
+    <link rel="modulepreload" href="/product-monitor/screens/procurement-staff.js?v=procurement-functions-3">
+    <link rel="modulepreload" href="/product-monitor/screens/production-staff.js?v=production-functions-1">
+    <link rel="modulepreload" href="/product-monitor/screens/management.js?v=management-workspace-1">
     <link rel="modulepreload" href="/product-monitor/screens/role-dashboard.js">
 </head>
 <body>
@@ -28,6 +31,46 @@
             <a href="#dashboard" data-page="dashboard">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1.5"/><rect width="7" height="5" x="14" y="3" rx="1.5"/><rect width="7" height="9" x="14" y="12" rx="1.5"/><rect width="7" height="5" x="3" y="16" rx="1.5"/></svg>
                 <span>Dashboard</span>
+            </a>
+            <a href="#procurement-materials" data-page="procurement-materials">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5v-9Z"/><path d="m3.3 7.7 8.7 4.8 8.7-4.8M12 12.5V21"/></svg>
+                <span>Material Requirements</span>
+            </a>
+            <a href="#procurement-requests" data-page="procurement-requests">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 3h8l4 4v14H4V3h4Z"/><path d="M8 12h8M8 16h8M15 3v5h5"/></svg>
+                <span>Purchase Requests &amp; Orders</span>
+            </a>
+            <a href="#procurement-suppliers" data-page="procurement-suppliers">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 21V7l9-4 9 4v14M3 11h18M8 21v-6h8v6M8 8h.01M12 8h.01M16 8h.01"/></svg>
+                <span>Suppliers</span>
+            </a>
+            <a href="#procurement-deliveries" data-page="procurement-deliveries">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6h11v12H3zM14 10h4l3 3v5h-7z"/><circle cx="7.5" cy="19" r="1.5"/><circle cx="18" cy="19" r="1.5"/><path d="M3 10h11"/></svg>
+                <span>Suppliers &amp; Deliveries</span>
+            </a>
+            <a href="#procurement-reports" data-page="procurement-reports">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19V5M4 19h17M8 15l3-4 3 2 5-7"/></svg>
+                <span>Procurement Reports</span>
+            </a>
+            <a href="#production-materials" data-page="production-materials">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5v-9Z"/><path d="m3.3 7.7 8.7 4.8 8.7-4.8M12 12.5V21"/></svg>
+                <span>Available Materials</span>
+            </a>
+            <a href="#production-requests" data-page="production-requests">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 3h8l4 4v14H4V3h4Z"/><path d="M8 12h8M8 16h8M15 3v5h5"/></svg>
+                <span>Material Requests</span>
+            </a>
+            <a href="#production-issued" data-page="production-issued">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18" cy="17" r="3"/></svg>
+                <span>Issued Materials</span>
+            </a>
+            <a href="#production-batches" data-page="production-batches">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M12 13v4M12 17h3"/></svg>
+                <span>Batch Availability &amp; Expiration</span>
+            </a>
+            <a href="#management-workspace" data-page="management-workspace">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 20h18M5 16V9M10 16V4M15 16v-5M20 16V7"/></svg>
+                <span>Management Workspace</span>
             </a>
             <a href="#inventory" data-page="inventory">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
@@ -108,7 +151,7 @@
     </div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <script src="/product-monitor/script.js?v=temporary-password-required-1" defer></script>
-    <script type="module" src="/product-monitor/main.js?v=temporary-password-required-1"></script>
+    <script src="/product-monitor/script.js?v=erp-workflow-merge-1" defer></script>
+    <script type="module" src="/product-monitor/main.js?v=erp-workflow-merge-1"></script>
 </body>
 </html>

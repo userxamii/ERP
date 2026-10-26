@@ -97,17 +97,57 @@ const pageMetadata = {
         title: "User Management",
         subtitle: "Review account information and administration availability.",
     },
+    "procurement-materials": {
+        title: "Material Requirements",
+        subtitle: "Review available, reserved, inbound, and replenishment quantities.",
+    },
+    "procurement-requests": {
+        title: "Purchase Requests & Orders",
+        subtitle: "Track requests through approval and convert approved demand into supplier orders.",
+    },
+    "procurement-suppliers": {
+        title: "Suppliers",
+        subtitle: "Review supplier contacts, terms, order history, and delivery performance.",
+    },
+    "procurement-deliveries": {
+        title: "Deliveries",
+        subtitle: "Track expected arrivals, received quantities, batch lots, and discrepancies.",
+    },
+    "procurement-reports": {
+        title: "Procurement Reports",
+        subtitle: "Review replenishment history, material demand, delivery delays, and stock risks.",
+    },
+    "production-materials": {
+        title: "Available Materials",
+        subtitle: "Check usable quantities, QA status, lot numbers, expiry dates, and warehouse locations.",
+    },
+    "production-requests": {
+        title: "Material Requests",
+        subtitle: "Submit production requirements and track approval and warehouse fulfillment.",
+    },
+    "production-issued": {
+        title: "Issued Materials",
+        subtitle: "Review material batches issued to production and their remaining balance.",
+    },
+    "production-batches": {
+        title: "Batch Availability & Expiration",
+        subtitle: "Use FEFO recommendations while respecting quality and material eligibility.",
+    },
+    "management-workspace": {
+        title: "Management Workspace",
+        subtitle: "Review executive inventory performance, department reports, risks, and decisions.",
+    },
 };
 
 const rolePermissions = {
-    "Warehouse Staff": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
-    "Procurement Staff": ["dashboard", "inventory", "operations", "alerts", "settings"],
-    "Production Staff": ["dashboard", "inventory", "operations", "alerts", "settings"],
+    "Warehouse Staff": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings", "production-requests"],
+    "Procurement Staff": ["dashboard", "inventory", "operations", "alerts", "settings", "procurement-materials", "procurement-requests", "procurement-suppliers", "procurement-deliveries", "procurement-reports"],
+    "Production Staff": ["dashboard", "inventory", "operations", "alerts", "settings", "production-materials", "production-requests", "production-issued", "production-batches"],
     "Sales & Distribution Staff": ["dashboard", "expiring", "operations", "alerts", "settings"],
     "Quality Assurance (QA)": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
     "Finance Staff": ["dashboard", "operations", "alerts", "settings"],
-    "Management": ["dashboard", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
-    "System Administrator": ["dashboard", "admin-users", "inventory", "aging", "expiring", "operations", "alerts", "settings"],
+    "Management": ["dashboard", "management-workspace", "inventory", "aging", "expiring", "operations", "alerts", "settings", "procurement-requests", "production-requests"],
+    "System Administrator": ["dashboard", "management-workspace", "inventory", "aging", "expiring", "operations", "alerts", "settings", "admin-users", "procurement-requests", "production-requests"],
 };
 
 const roleHighlights = {
@@ -820,6 +860,8 @@ async function sendWorkspaceRequest(endpoint, data, method = "POST") {
 
     return payload;
 }
+
+window.sendWorkspaceRequest = sendWorkspaceRequest;
 
 function applyWorkspaceState(workspaceState) {
     Object.entries(workspaceState.productStatuses).forEach(([productId, status]) => {
@@ -2031,6 +2073,7 @@ function showToast(message) {
     toast.classList.add("visible");
     toastTimeout = setTimeout(() => toast.classList.remove("visible"), 2800);
 }
+window.showToast = showToast;
 
 function handlePageChange() {
     if (!authState.isAuthenticated) {

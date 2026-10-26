@@ -2,9 +2,7 @@
 
 use App\Models\SystemActivity;
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Notification;
 
 test('system administrators can view all registered accounts and their roles', function () {
     $administrator = User::factory()->create([
@@ -192,19 +190,9 @@ test('the last active administrator cannot be deactivated', function () {
     ]);
 });
 
-test('system administrators can send password reset links for an account', function () {
-    Notification::fake();
-    $administrator = User::factory()->create([
-        'role' => 'System Administrator',
-    ]);
-    $user = User::factory()->create();
-
-    $this->actingAs($administrator)
-        ->postJson(route('warehouse.admin.users.password-reset', $user))
-        ->assertOk()
-        ->assertJsonPath('message', 'A password reset link has been sent by email.');
-
-    Notification::assertSentTo($user, ResetPassword::class);
+test('administrator account directory no longer exposes password reset action', function () {
+    $this->postJson('/warehouse/admin/users/1/password-reset')
+        ->assertNotFound();
 });
 
 test('non-administrators cannot access system health or change accounts', function () {
