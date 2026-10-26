@@ -184,21 +184,6 @@ body[data-role="Sales & Distribution Staff"] {
     margin: 12px 0 0;
 }
 
-.admin-status-list {
-    display: grid;
-    gap: 0;
-}
-
-.admin-status-list > div {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--cream-border-subtle);
-    color: var(--text-body, #1A302F);
-    font-size: 13px;
-}
-
 .admin-status {
     display: inline-flex;
     align-items: center;
@@ -491,12 +476,6 @@ body[data-role="Sales & Distribution Staff"] {
         grid-template-columns: 1fr;
     }
 
-    .admin-status-list > div {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 6px;
-    }
-
     .admin-user-form {
         grid-template-columns: 1fr;
         min-width: min(320px, calc(100vw - 36px));
@@ -603,21 +582,6 @@ body[data-role="Sales & Distribution Staff"] {
 
 .admin-table-note {
     margin: 12px 0 0;
-}
-
-.admin-status-list {
-    display: grid;
-    gap: 0;
-}
-
-.admin-status-list > div {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 12px 0;
-    border-bottom: 1px solid #eceef0;
-    color: #525a64;
-    font-size: 13px;
 }
 
 .admin-status {
@@ -838,12 +802,6 @@ body[data-role="Sales & Distribution Staff"] {
 @media (max-width: 520px) {
     .admin-module-grid {
         grid-template-columns: 1fr;
-    }
-
-    .admin-status-list > div {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 6px;
     }
 
     .admin-user-form {
@@ -1581,10 +1539,15 @@ h3 {
 }
 
 .login-shell {
+    position: fixed;
+    z-index: 20;
+    inset: 0;
     display: grid;
+    width: 100vw;
     min-height: 100vh;
     place-items: center;
     padding: 36px 20px;
+    overflow-y: auto;
     background:
         radial-gradient(ellipse at 50% 15%, var(--cream) 0%, var(--cream-light) 60%, var(--cream-warm) 100%);
 }

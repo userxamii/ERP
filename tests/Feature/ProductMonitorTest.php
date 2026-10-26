@@ -72,6 +72,18 @@ test('public login does not offer account creation and directs users to administ
         ->toContain('"/warehouse/admin/users"');
 });
 
+test('administrator dashboard omits its standalone heading and updated note', function () {
+    $administratorScreen = file_get_contents(base_path('product-monitor/screens/system-administrator.js'));
+
+    expect($administratorScreen)
+        ->toContain('{ page: "dashboard", label: "Overview" }')
+        ->toContain('${section.page === "dashboard" ? "" : renderAdminPageHeader(section)}')
+        ->not->toContain('Admin Dashboard')
+        ->not->toContain('System administration overview.')
+        ->not->toContain('id="adminDashboardStatus"')
+        ->not->toContain('Updated just now. Login counts cover the last 24 hours.');
+});
+
 test('new users are required to change their temporary password before using the workspace', function () {
     $authScreen = file_get_contents(base_path('product-monitor/screens/auth.js'));
     $applicationScript = file_get_contents(base_path('product-monitor/script.js'));

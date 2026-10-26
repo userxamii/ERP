@@ -5,7 +5,7 @@ import { renderAlertsScreen } from './screens/alerts.js?v=alerts-unread-count-2'
 import { renderSettingsScreen } from './screens/settings.js';
 import { renderChangePasswordScreen, renderLoginScreen } from './screens/auth.js?v=temporary-password-required-1';
 import { salesDistributionStaff } from './screens/sales-and-distribution-staff.js';
-import { systemAdministrator } from './screens/system-administrator.js?v=temporary-password-required-1';
+import { systemAdministrator } from './screens/system-administrator.js?v=remove-admin-dashboard-header-1';
 import { warehouseStaff } from './screens/warehouse-staff.js';
 import { procurementStaff } from './screens/procurement-staff.js?v=procurement-functions-3';
 import { productionStaff } from './screens/production-staff.js?v=production-functions-1';
