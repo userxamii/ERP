@@ -1,5 +1,5 @@
 const salesDistributionStaff = {
-    theme: { accent: "#4b4f54", accentStrong: "#252a2e", accentSoft: "#f0f1f3" },
+    theme: { accent: "#0F3D3A", accentStrong: "#0A2927", accentSoft: "#F5DABF" },
     operationalQueue: [
         { title: "Review products nearing expiration", status: "Priority", detail: "Check the expiration alerts and upcoming batches" },
         { title: "Prioritize products for distribution", status: "Pending", detail: "Move eligible near-expiry products into distribution" },

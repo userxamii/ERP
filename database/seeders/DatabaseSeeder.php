@@ -23,5 +23,7 @@ class DatabaseSeeder extends Seeder
                 'role' => 'Warehouse Staff',
             ],
         );
+
+        $this->call(SampleErpDataSeeder::class);
     }
 }

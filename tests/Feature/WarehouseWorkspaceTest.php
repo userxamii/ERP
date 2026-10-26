@@ -91,6 +91,47 @@ test('marking an alert as read persists it for only the signed-in user', functio
         ->assertJsonPath('workspaceState.readAlertIds', []);
 });
 
+test('undoing an alert read removes only the signed-in user read state', function () {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+    $alertId = 'expiration-B-001';
+    $timestamp = now();
+
+    DB::table('product_monitor_alert_reads')->insert([
+        [
+            'user_id' => $user->id,
+            'alert_id' => $alertId,
+            'read_at' => $timestamp,
+            'created_at' => $timestamp,
+            'updated_at' => $timestamp,
+        ],
+        [
+            'user_id' => $otherUser->id,
+            'alert_id' => $alertId,
+            'read_at' => $timestamp,
+            'created_at' => $timestamp,
+            'updated_at' => $timestamp,
+        ],
+    ]);
+
+    $this->actingAs($user)
+        ->deleteJson(route('warehouse.workspace.alerts.unread', $alertId))
+        ->assertOk()
+        ->assertJsonPath('unreadAlertIds.0', $alertId);
+
+    $this->assertDatabaseMissing('product_monitor_alert_reads', [
+        'user_id' => $user->id,
+        'alert_id' => $alertId,
+    ]);
+    $this->assertDatabaseHas('product_monitor_alert_reads', [
+        'user_id' => $otherUser->id,
+        'alert_id' => $alertId,
+    ]);
+    $this->getJson(route('warehouse.auth.session'))
+        ->assertOk()
+        ->assertJsonPath('workspaceState.readAlertIds', []);
+});
+
 test('marking all active alerts as read persists every alert', function () {
     $user = User::factory()->create();
     $alertIds = ['aging-B-001', 'expiration-B-001'];
@@ -132,6 +173,8 @@ test('marking alerts as read requires authentication', function () {
     $this->postJson(route('warehouse.workspace.alerts.read-all'), [
         'alert_ids' => ['expiration-B-001'],
     ])->assertUnauthorized();
+    $this->deleteJson(route('warehouse.workspace.alerts.unread', 'expiration-B-001'))
+        ->assertUnauthorized();
 
     $this->assertDatabaseCount('product_monitor_alert_reads', 0);
 });

@@ -8,9 +8,8 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules;
 
 class SystemAdministratorController extends Controller
 {
@@ -83,23 +82,20 @@ class SystemAdministratorController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
             'role' => ['required', Rule::in(User::ROLES)],
             'department' => ['nullable', 'string', 'max:100'],
+            'password' => ['required', Rules\Password::defaults()],
         ]);
 
         $user = User::query()->create([
             ...$validated,
-            'password' => Str::random(64),
             'is_active' => true,
+            'must_change_password' => true,
         ]);
 
-        $resetStatus = Password::sendResetLink(['email' => $user->email]);
         $this->recordActivity($actor, $user, 'user_created', "Created account for {$user->name}.");
 
         return response()->json([
             'user' => $this->userData($user),
-            'message' => $resetStatus === Password::RESET_LINK_SENT
-                ? 'Account created. A password setup link has been sent by email.'
-                : 'Account created, but a password setup email could not be sent.',
-            'resetLinkSent' => $resetStatus === Password::RESET_LINK_SENT,
+            'message' => 'Account created. The user must change this temporary password at first sign-in.',
         ], 201);
     }
 
@@ -138,24 +134,6 @@ class SystemAdministratorController extends Controller
 
         return response()->json([
             'user' => $this->userData($user->refresh()),
-        ]);
-    }
-
-    public function sendPasswordReset(Request $request, User $user): JsonResponse
-    {
-        $actor = $this->authorizeAdministrator($request);
-        $resetStatus = Password::sendResetLink(['email' => $user->email]);
-
-        if ($resetStatus !== Password::RESET_LINK_SENT) {
-            return response()->json([
-                'message' => 'The password reset email could not be sent.',
-            ], 503);
-        }
-
-        $this->recordActivity($actor, $user, 'password_reset_requested', "Requested a password reset for {$user->email}.");
-
-        return response()->json([
-            'message' => 'A password reset link has been sent by email.',
         ]);
     }
 

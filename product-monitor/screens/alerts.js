@@ -8,9 +8,9 @@ function renderAlertsPage() {
 
     return `
         <section class="alerts-summary">
-            <article><span class="summary-icon orange">${renderAlertIcon("aging")}</span><span><strong>${alerts.filter(alert => alert.category === "aging").length}</strong><small>Aging alerts</small></span></article>
-            <article><span class="summary-icon amber">${renderAlertIcon("expiration")}</span><span><strong>${alerts.filter(alert => alert.category === "expiration").length}</strong><small>Expiration alerts</small></span></article>
-            <article><span class="summary-icon red">${renderAlertIcon("expired")}</span><span><strong>${alerts.filter(alert => alert.category === "expired").length}</strong><small>Expired alerts</small></span></article>
+            <article><span class="summary-icon orange">${renderAlertIcon("aging")}</span><span><strong data-alert-count-category="aging">${alerts.filter(alert => alert.category === "aging" && !readAlertIds.has(alert.id)).length}</strong><small>Unread aging alerts</small></span></article>
+            <article><span class="summary-icon amber">${renderAlertIcon("expiration")}</span><span><strong data-alert-count-category="expiration">${alerts.filter(alert => alert.category === "expiration" && !readAlertIds.has(alert.id)).length}</strong><small>Unread expiration alerts</small></span></article>
+            <article><span class="summary-icon red">${renderAlertIcon("expired")}</span><span><strong data-alert-count-category="expired">${alerts.filter(alert => alert.category === "expired" && !readAlertIds.has(alert.id)).length}</strong><small>Unread expired alerts</small></span></article>
             <button type="button" class="secondary-button mark-all-button" data-action="mark-all-read">Mark all as read</button>
         </section>
         ${categories.map(category => {
@@ -20,7 +20,7 @@ function renderAlertsPage() {
                 <section class="panel alert-category-panel">
                     <div class="panel-heading">
                         <div><h2>${category.title}</h2><p class="panel-description">${category.description}</p></div>
-                        <span class="category-count">${categoryAlerts.length}</span>
+                        <span class="category-count" data-alert-count-category="${category.id}" aria-label="Unread alerts">${categoryAlerts.filter(alert => !readAlertIds.has(alert.id)).length}</span>
                     </div>
                     ${categoryAlerts.length > 0
                         ? `<div class="alert-list">${categoryAlerts.map(renderAlertCard).join("")}</div>`
@@ -46,7 +46,7 @@ function renderAlertCard(alert) {
                 <small>${escapeHTML(alert.product.name)} · Batch ${escapeHTML(alert.product.batch)} · ${getDateLabel(alert.date)}</small>
             </div>
             <span class="priority-tag ${getPriorityClass(alert.priority)}">${escapeHTML(alert.priority)}</span>
-            ${isRead ? "" : `<button class="mark-read-button" type="button" data-action="mark-read" data-alert-id="${escapeHTML(alert.id)}">Mark as read</button>`}
+            <button class="mark-read-button${isRead ? " is-read" : ""}" type="button" data-action="${isRead ? "mark-unread" : "mark-read"}" data-alert-id="${escapeHTML(alert.id)}">${isRead ? "Undo read" : "Mark as read"}</button>
         </article>
     `;
 }

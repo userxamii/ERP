@@ -12,7 +12,7 @@ function renderDashboard(role = authState.role) {
     return `
         <section class="welcome-row">
             <div>
-                <h2>Good ${getGreeting()}, ${role}</h2>
+                <h2>Good ${getGreeting()}</h2>
                 <p>Here is the latest overview of your warehouse inventory.</p>
             </div>
             <span class="date-chip">${getDateLabel(todayString())}</span>
@@ -26,7 +26,7 @@ function renderDashboard(role = authState.role) {
             <div class="panel-heading">
                 <div>
                     <p class="eyebrow">ROLE FOCUS</p>
-                    <h2>${role} overview</h2>
+                    <h2>Overview</h2>
                 </div>
             </div>
             <ul class="role-highlights">
@@ -38,7 +38,7 @@ function renderDashboard(role = authState.role) {
             <div class="panel-heading">
                 <div>
                     <p class="eyebrow">QUICK ACTIONS</p>
-                    <h2>${role} next steps</h2>
+                    <h2>Next steps</h2>
                 </div>
             </div>
             <div class="quick-action-list">
@@ -50,7 +50,7 @@ function renderDashboard(role = authState.role) {
             <div class="panel-heading">
                 <div>
                     <p class="eyebrow">OPERATIONS QUEUE</p>
-                    <h2>${role} task list</h2>
+                    <h2>Task list</h2>
                 </div>
             </div>
             <div class="task-list">
@@ -70,7 +70,7 @@ function renderDashboard(role = authState.role) {
             <div class="panel-heading">
                 <div>
                     <p class="eyebrow">INSIGHTS</p>
-                    <h2>${role} operational summary</h2>
+                    <h2>Operational summary</h2>
                 </div>
             </div>
             <ul class="insight-list">
@@ -82,7 +82,7 @@ function renderDashboard(role = authState.role) {
             <div class="panel-heading">
                 <div>
                     <p class="eyebrow">RECENT ACTIVITY</p>
-                    <h2>${role} updates</h2>
+                    <h2>Recent updates</h2>
                 </div>
             </div>
             <div class="activity-feed">

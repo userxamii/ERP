@@ -626,18 +626,18 @@ function getRecentActivity(role) {
 }
 
 const roleTheme = {
-    "Warehouse Staff": { accent: "#1e2024", accentStrong: "#0b0d10", accentSoft: "#f3f4f6" },
-    "Procurement Staff": { accent: "#1d4ed8", accentStrong: "#1e3a8a", accentSoft: "#eff6ff" },
-    "Production Staff": { accent: "#3b3f45", accentStrong: "#1d2126", accentSoft: "#f0f2f4" },
-    "Quality Assurance (QA)": { accent: "#5a5d61", accentStrong: "#2a2d31", accentSoft: "#f2f3f5" },
-    "Finance Staff": { accent: "#4c4f53", accentStrong: "#1d1f22", accentSoft: "#eef1f4" },
-    Management: { accent: "#2a2d31", accentStrong: "#101214", accentSoft: "#f4f5f6" },
-    "System Administrator": { accent: "#3d3f44", accentStrong: "#17191c", accentSoft: "#f1f3f5" },
+    "Warehouse Staff": { accent: "#0F3D3A", accentStrong: "#0A2927", accentSoft: "#F5DABF" },
+    "Procurement Staff": { accent: "#0F3D3A", accentStrong: "#0A2927", accentSoft: "#F5DABF" },
+    "Production Staff": { accent: "#0F3D3A", accentStrong: "#0A2927", accentSoft: "#F5DABF" },
+    "Quality Assurance (QA)": { accent: "#6C151E", accentStrong: "#520F16", accentSoft: "#F5DABF" },
+    "Finance Staff": { accent: "#0F3D3A", accentStrong: "#0A2927", accentSoft: "#F5DABF" },
+    Management: { accent: "#6C151E", accentStrong: "#520F16", accentSoft: "#F5DABF" },
+    "System Administrator": { accent: "#0F3D3A", accentStrong: "#0A2927", accentSoft: "#F5DABF" },
 };
 
 const authState = {
     isAuthenticated: false,
-    hasAccounts: false,
+    mustChangePassword: false,
     role: "Warehouse Staff",
     email: "",
     fullName: "",
@@ -682,6 +682,17 @@ function getNameInitials(name) {
     return initials || "WM";
 }
 
+function closeProfileMenu() {
+    const profileMenu = document.getElementById("profileMenu");
+    const profileMenuButton = document.getElementById("profileMenuButton");
+
+    if (profileMenu && profileMenuButton) {
+        profileMenu.hidden = true;
+        profileMenuButton.setAttribute("aria-expanded", "false");
+        profileMenuButton.setAttribute("aria-label", "Open account menu");
+    }
+}
+
 function applyRoleTheme() {
     const theme = authState.role === "Sales & Distribution Staff"
         ? salesDistributionStaff.theme
@@ -702,6 +713,9 @@ function syncProfile() {
     const profileName = document.querySelector(".profile-copy strong");
     const sidebarUserSmall = document.querySelector(".sidebar-user small");
     const profileSmall = document.querySelector(".profile-copy small");
+    const profileMenuName = document.getElementById("profileMenuName");
+    const profileMenuEmail = document.getElementById("profileMenuEmail");
+    const profileMenuRole = document.getElementById("profileMenuRole");
     const sidebarAvatars = document.querySelectorAll(".sidebar-user .avatar");
     const profileAvatars = document.querySelectorAll(".profile .avatar");
     const accountName = authState.fullName || authState.role;
@@ -725,6 +739,18 @@ function syncProfile() {
         profileSmall.textContent = authState.isAuthenticated ? authState.role : "Inventory team";
     }
 
+    if (profileMenuName) {
+        profileMenuName.textContent = accountName;
+    }
+
+    if (profileMenuEmail) {
+        profileMenuEmail.textContent = authState.email;
+    }
+
+    if (profileMenuRole) {
+        profileMenuRole.textContent = authState.isAuthenticated ? authState.role : "Inventory team";
+    }
+
     [...sidebarAvatars, ...profileAvatars].forEach(element => {
         element.textContent = accountInitials;
     });
@@ -745,19 +771,17 @@ function showAuthError(message) {
     }
 }
 
-function showAuthMode(mode, message = "", email = "") {
-    appView.innerHTML = mode === "signup"
-        ? renderSignupPage(message)
-        : renderLoginPage(message, email);
+function showAuthMode(message = "", email = "") {
+    appView.innerHTML = renderLoginPage(message, email);
     const authMessage = appView.querySelector(".auth-message");
 
     if (authMessage) {
         authMessage.id = "authMessage";
     }
 
-    pageTitle.textContent = mode === "signup" ? "Create account" : "Sign in";
+    pageTitle.textContent = "Sign in";
     pageSubtitle.textContent = "Warehouse Management";
-    document.title = `${mode === "signup" ? "Sign up" : "Sign in"} | Warehouse Management`;
+    document.title = "Sign in | Warehouse Management";
 }
 
 function applyAuthState() {
@@ -768,8 +792,8 @@ function applyAuthState() {
         return;
     }
 
-    sidebar.hidden = !authState.isAuthenticated;
-    topbar.hidden = !authState.isAuthenticated;
+    sidebar.hidden = !authState.isAuthenticated || authState.mustChangePassword;
+    topbar.hidden = !authState.isAuthenticated || authState.mustChangePassword;
     document.body.classList.toggle("authenticated", authState.isAuthenticated);
     modalLayer.hidden = true;
     document.body.classList.remove("modal-open");
@@ -777,13 +801,21 @@ function applyAuthState() {
     syncProfile();
 
     if (!authState.isAuthenticated) {
-        const mode = authState.hasAccounts ? "login" : "signup";
-        showAuthMode(mode);
+        closeProfileMenu();
+        showAuthMode();
+        return;
+    }
+
+    if (authState.mustChangePassword) {
+        pageTitle.textContent = "Change your password";
+        pageSubtitle.textContent = "A password change is required before continuing.";
+        document.title = "Change password | Warehouse Management";
+        appView.innerHTML = renderChangePasswordPage();
         return;
     }
 
     pageTitle.textContent = `${authState.role}`;
-    pageSubtitle.textContent = `Role workspace for ${authState.role}.`;
+    pageSubtitle.textContent = "Monitor inventory, alerts, and operational priorities.";
     document.title = `${authState.role} | Warehouse Management`;
 }
 
@@ -844,26 +876,6 @@ function applyWorkspaceState(workspaceState) {
     workspaceState.readAlertIds.forEach(alertId => readAlertIds.add(alertId));
 }
 
-async function registerAccount(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const name = String(formData.get("fullName") || "").trim();
-    const email = String(formData.get("email") || "").trim().toLowerCase();
-    const role = String(formData.get("role") || "");
-    const password = String(formData.get("password") || "");
-    const passwordConfirmation = String(formData.get("password_confirmation") || "");
-    const payload = await sendAuthRequest("/warehouse/auth/register", {
-        name,
-        email,
-        role,
-        password,
-        password_confirmation: passwordConfirmation,
-    });
-
-    authState.hasAccounts = true;
-    showAuthMode("login", payload.message, email);
-}
-
 async function loginUser(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
@@ -875,19 +887,40 @@ async function loginUser(event) {
     authState.role = payload.user.role;
     authState.email = payload.user.email;
     authState.fullName = payload.user.name;
+    authState.mustChangePassword = payload.mustChangePassword;
     applyWorkspaceState(payload.workspaceState);
     authState.isAuthenticated = true;
-    authState.hasAccounts = true;
 
+    window.location.hash = authState.mustChangePassword ? "change-password" : "dashboard";
+    applyAuthState();
+
+    if (!authState.mustChangePassword) {
+        handlePageChange();
+    }
+}
+
+async function changePassword(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const payload = await sendAuthRequest("/warehouse/auth/change-password", {
+        current_password: String(formData.get("current_password") || ""),
+        password: String(formData.get("password") || ""),
+        password_confirmation: String(formData.get("password_confirmation") || ""),
+    });
+
+    csrfToken = payload.csrfToken;
+    authState.mustChangePassword = false;
     window.location.hash = "dashboard";
     applyAuthState();
     handlePageChange();
+    showToast(payload.message);
 }
 
 async function logoutUser() {
     const payload = await sendAuthRequest("/warehouse/auth/logout", {});
     csrfToken = payload.csrfToken;
     authState.isAuthenticated = false;
+    authState.mustChangePassword = false;
     authState.role = "Warehouse Staff";
     authState.email = "";
     authState.fullName = "";
@@ -1022,7 +1055,9 @@ function getActiveAlerts() {
 }
 
 function updateAlertCounts() {
-    const unreadCount = getActiveAlerts().filter(alert => !readAlertIds.has(alert.id)).length;
+    const activeAlerts = getActiveAlerts();
+    const unreadAlerts = activeAlerts.filter(alert => !readAlertIds.has(alert.id));
+    const unreadCount = unreadAlerts.length;
     const headerCount = document.getElementById("headerAlertCount");
     const navCount = document.getElementById("navAlertCount");
 
@@ -1030,12 +1065,19 @@ function updateAlertCounts() {
         countElement.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
         countElement.hidden = unreadCount === 0;
     });
+
+    document.querySelectorAll("[data-alert-count-category]").forEach(countElement => {
+        const categoryUnreadCount = unreadAlerts.filter(alert => alert.category === countElement.dataset.alertCountCategory).length;
+        countElement.textContent = String(categoryUnreadCount);
+    });
 }
+
+window.updateAlertCounts = updateAlertCounts;
 
 function renderStatCard(label, value, note, color, icon) {
     const resolvedIcon = icon || (typeof getStatCardIcon === "function" ? getStatCardIcon(label) : "");
     return `
-        <article class="stat-card">
+        <article class="stat-card ${color === "red" ? "critical" : ""}">
             <div class="stat-icon ${color}">${resolvedIcon}</div>
             <div class="stat-copy">
                 <span>${label}</span>
@@ -1288,7 +1330,7 @@ function renderDashboard() {
     return `
         <section class="welcome-row">
             <div>
-                <h2>Good ${getGreeting()}, ${authState.role}</h2>
+                <h2>Good ${getGreeting()}</h2>
                 <p>Here is the latest overview of your warehouse inventory.</p>
             </div>
             <span class="date-chip">${getDateLabel(todayString())}</span>
@@ -1302,7 +1344,7 @@ function renderDashboard() {
             <div class="panel-heading">
                 <div>
                     <p class="eyebrow">ROLE FOCUS</p>
-                    <h2>${authState.role} overview</h2>
+                    <h2>Overview</h2>
                 </div>
             </div>
             <ul class="role-highlights">
@@ -1314,7 +1356,7 @@ function renderDashboard() {
             <div class="panel-heading">
                 <div>
                     <p class="eyebrow">QUICK ACTIONS</p>
-                    <h2>${authState.role} next steps</h2>
+                    <h2>Next steps</h2>
                 </div>
             </div>
             <div class="quick-action-list">
@@ -1326,7 +1368,7 @@ function renderDashboard() {
             <div class="panel-heading">
                 <div>
                     <p class="eyebrow">OPERATIONS QUEUE</p>
-                    <h2>${authState.role} task list</h2>
+                    <h2>Task list</h2>
                 </div>
             </div>
             <div class="task-list">
@@ -1346,7 +1388,7 @@ function renderDashboard() {
             <div class="panel-heading">
                 <div>
                     <p class="eyebrow">INSIGHTS</p>
-                    <h2>${authState.role} operational summary</h2>
+                    <h2>Operational summary</h2>
                 </div>
             </div>
             <ul class="insight-list">
@@ -1358,7 +1400,7 @@ function renderDashboard() {
             <div class="panel-heading">
                 <div>
                     <p class="eyebrow">RECENT ACTIVITY</p>
-                    <h2>${authState.role} updates</h2>
+                    <h2>Recent updates</h2>
                 </div>
             </div>
             <div class="activity-feed">
@@ -1820,9 +1862,9 @@ function renderAlertsPage() {
 
     return `
         <section class="alerts-summary">
-            <article><span class="summary-icon orange">${renderAlertIcon("aging")}</span><span><strong>${alerts.filter(alert => alert.category === "aging").length}</strong><small>Aging alerts</small></span></article>
-            <article><span class="summary-icon amber">${renderAlertIcon("expiration")}</span><span><strong>${alerts.filter(alert => alert.category === "expiration").length}</strong><small>Expiration alerts</small></span></article>
-            <article><span class="summary-icon red">${renderAlertIcon("expired")}</span><span><strong>${alerts.filter(alert => alert.category === "expired").length}</strong><small>Expired alerts</small></span></article>
+            <article><span class="summary-icon orange">${renderAlertIcon("aging")}</span><span><strong data-alert-count-category="aging">${alerts.filter(alert => alert.category === "aging" && !readAlertIds.has(alert.id)).length}</strong><small>Unread aging alerts</small></span></article>
+            <article><span class="summary-icon amber">${renderAlertIcon("expiration")}</span><span><strong data-alert-count-category="expiration">${alerts.filter(alert => alert.category === "expiration" && !readAlertIds.has(alert.id)).length}</strong><small>Unread expiration alerts</small></span></article>
+            <article><span class="summary-icon red">${renderAlertIcon("expired")}</span><span><strong data-alert-count-category="expired">${alerts.filter(alert => alert.category === "expired" && !readAlertIds.has(alert.id)).length}</strong><small>Unread expired alerts</small></span></article>
             <button type="button" class="secondary-button mark-all-button" data-action="mark-all-read">Mark all as read</button>
         </section>
         ${categories.map(category => {
@@ -1832,7 +1874,7 @@ function renderAlertsPage() {
                 <section class="panel alert-category-panel">
                     <div class="panel-heading">
                         <div><h2>${category.title}</h2><p class="panel-description">${category.description}</p></div>
-                        <span class="category-count">${categoryAlerts.length}</span>
+                        <span class="category-count" data-alert-count-category="${category.id}" aria-label="Unread alerts">${categoryAlerts.filter(alert => !readAlertIds.has(alert.id)).length}</span>
                     </div>
                     ${categoryAlerts.length > 0
                         ? `<div class="alert-list">${categoryAlerts.map(renderAlertCard).join("")}</div>`
@@ -1858,7 +1900,7 @@ function renderAlertCard(alert) {
                 <small>${escapeHTML(alert.product.name)} · Batch ${escapeHTML(alert.product.batch)} · ${getDateLabel(alert.date)}</small>
             </div>
             <span class="priority-tag ${getPriorityClass(alert.priority)}">${escapeHTML(alert.priority)}</span>
-            ${isRead ? "" : `<button class="mark-read-button" type="button" data-action="mark-read" data-alert-id="${escapeHTML(alert.id)}">Mark as read</button>`}
+            <button class="mark-read-button${isRead ? " is-read" : ""}" type="button" data-action="${isRead ? "mark-unread" : "mark-read"}" data-alert-id="${escapeHTML(alert.id)}">${isRead ? "Undo read" : "Mark as read"}</button>
         </article>
     `;
 }
@@ -1919,7 +1961,7 @@ function renderPage(page) {
     const roleSubtitle = isProcurementDashboard
         ? "Monitor replenishment prerequisites, supplier delivery data, and material availability."
         : safePage === "dashboard"
-            ? `Role workspace for ${authState.role}.`
+            ? "Monitor inventory, alerts, and operational priorities."
         : `${metadata.subtitle}`;
 
     pageTitle.textContent = roleHeader;
@@ -2039,6 +2081,11 @@ function handlePageChange() {
         return;
     }
 
+    if (authState.mustChangePassword) {
+        appView.innerHTML = renderChangePasswordPage();
+        return;
+    }
+
     const requestedPage = window.location.hash.slice(1);
     const page = requestedPage;
 
@@ -2051,13 +2098,13 @@ function handlePageChange() {
 }
 
 appView.addEventListener("submit", async event => {
-    if (!["signupForm", "loginForm"].includes(event.target.id)) {
+    if (!["loginForm", "changePasswordForm"].includes(event.target.id)) {
         return;
     }
 
     try {
-        if (event.target.id === "signupForm") {
-            await registerAccount(event);
+        if (event.target.id === "changePasswordForm") {
+            await changePassword(event);
         } else {
             await loginUser(event);
         }
@@ -2080,10 +2127,8 @@ appView.addEventListener("change", event => {
 });
 
 appView.addEventListener("click", event => {
-    const authModeButton = event.target.closest("[data-auth-mode]");
-
-    if (authModeButton) {
-        showAuthMode(authModeButton.dataset.authMode);
+    if (event.target.closest('[data-auth-action="logout"]')) {
+        logoutUser().catch(error => showAuthError(error.message));
         return;
     }
 
@@ -2156,24 +2201,84 @@ appView.addEventListener("click", event => {
             })
             .catch(error => showToast(error.message));
     } else if (action === "mark-read") {
+        actionButton.disabled = true;
+        actionButton.textContent = "Saving…";
         sendWorkspaceRequest(`/warehouse/workspace/alerts/${encodeURIComponent(alertId)}/read`, {})
             .then(() => {
                 readAlertIds.add(alertId);
-                renderPage("alerts");
+                const alertCard = actionButton.closest(".alert-card");
+                const unreadLabel = alertCard?.querySelector(".unread-label");
+
+                if (alertCard) {
+                    alertCard.classList.remove("unread");
+                    alertCard.classList.add("read");
+                }
+
+                if (unreadLabel) {
+                    unreadLabel.classList.replace("unread-label", "read-label");
+                    unreadLabel.textContent = "Read";
+                }
+
+                actionButton.classList.add("is-read");
+                actionButton.dataset.action = "mark-unread";
+                actionButton.textContent = "Undo read";
+                actionButton.disabled = false;
+                updateAlertCounts();
             })
-            .catch(error => showToast(error.message));
+            .catch(error => {
+                actionButton.disabled = false;
+                actionButton.textContent = "Mark as read";
+                showToast(error.message);
+            });
+    } else if (action === "mark-unread") {
+        actionButton.disabled = true;
+        actionButton.textContent = "Undoing…";
+        sendWorkspaceRequest(`/warehouse/workspace/alerts/${encodeURIComponent(alertId)}/read`, {}, "DELETE")
+            .then(() => {
+                readAlertIds.delete(alertId);
+                const alertCard = actionButton.closest(".alert-card");
+                const readLabel = alertCard?.querySelector(".read-label");
+
+                if (alertCard) {
+                    alertCard.classList.remove("read");
+                    alertCard.classList.add("unread");
+                }
+
+                if (readLabel) {
+                    readLabel.classList.replace("read-label", "unread-label");
+                    readLabel.textContent = "Unread";
+                }
+
+                actionButton.classList.remove("is-read");
+                actionButton.dataset.action = "mark-read";
+                actionButton.textContent = "Mark as read";
+                actionButton.disabled = false;
+                updateAlertCounts();
+            })
+            .catch(error => {
+                actionButton.disabled = false;
+                actionButton.textContent = "Undo read";
+                showToast(error.message);
+            });
     } else if (action === "mark-all-read") {
         const alertIds = getActiveAlerts().map(alert => alert.id);
 
+        actionButton.disabled = true;
+        actionButton.textContent = "Saving…";
         sendWorkspaceRequest("/warehouse/workspace/alerts/read", {
             alert_ids: alertIds,
         })
-            .then(() => {
-                alertIds.forEach(id => readAlertIds.add(id));
+            .then(payload => {
+                payload.readAlertIds.forEach(id => readAlertIds.add(id));
+                updateAlertCounts();
                 renderPage("alerts");
                 showToast("All active alerts marked as read.");
             })
-            .catch(error => showToast(error.message));
+            .catch(error => {
+                actionButton.disabled = false;
+                actionButton.textContent = "Mark all as read";
+                showToast(error.message);
+            });
     }
 });
 
@@ -2246,6 +2351,28 @@ document.getElementById("notificationButton").addEventListener("click", () => {
     window.location.hash = "alerts";
 });
 
+const profileMenuButton = document.getElementById("profileMenuButton");
+const profileMenu = document.getElementById("profileMenu");
+
+profileMenuButton.addEventListener("click", () => {
+    const isExpanded = profileMenuButton.getAttribute("aria-expanded") === "true";
+    profileMenu.hidden = isExpanded;
+    profileMenuButton.setAttribute("aria-expanded", String(!isExpanded));
+    profileMenuButton.setAttribute("aria-label", isExpanded ? "Open account menu" : "Close account menu");
+});
+
+profileMenu.addEventListener("click", event => {
+    if (event.target.closest("a")) {
+        closeProfileMenu();
+    }
+});
+
+document.addEventListener("click", event => {
+    if (!event.target.closest(".profile-menu-container")) {
+        closeProfileMenu();
+    }
+});
+
 modalLayer.addEventListener("keydown", event => {
     if (event.key === "Escape") {
         closeModal();
@@ -2255,6 +2382,11 @@ modalLayer.addEventListener("keydown", event => {
 document.addEventListener("keydown", event => {
     if (event.key === "Escape") {
         closeModal();
+
+        if (!profileMenu.hidden) {
+            closeProfileMenu();
+            profileMenuButton.focus();
+        }
     }
 });
 
@@ -2295,7 +2427,6 @@ async function initializeAuthentication() {
 
         const session = await response.json();
         csrfToken = session.csrfToken;
-        authState.hasAccounts = session.hasAccounts;
 
         if (session.authenticated) {
             if (
@@ -2308,6 +2439,7 @@ async function initializeAuthentication() {
             }
 
             authState.isAuthenticated = true;
+            authState.mustChangePassword = Boolean(session.mustChangePassword);
             authState.role = session.user.role;
             authState.email = session.user.email;
             authState.fullName = session.user.name;
@@ -2321,9 +2453,9 @@ async function initializeAuthentication() {
         }
     } catch (error) {
         authState.isAuthenticated = false;
+        authState.mustChangePassword = false;
         applyAuthState();
         showAuthMode(
-            "login",
             error instanceof Error ? error.message : "Unable to connect to the warehouse authentication service.",
         );
     }

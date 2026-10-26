@@ -53,6 +53,21 @@ class WarehouseWorkspaceController extends Controller
         ]);
     }
 
+    public function markAlertUnread(Request $request, string $alertId): JsonResponse
+    {
+        $user = $request->user();
+        abort_unless($user instanceof User, 401);
+
+        DB::table('product_monitor_alert_reads')
+            ->where('user_id', $user->id)
+            ->where('alert_id', $alertId)
+            ->delete();
+
+        return response()->json([
+            'unreadAlertIds' => [$alertId],
+        ]);
+    }
+
     public function markAlertsRead(Request $request): JsonResponse
     {
         $user = $request->user();

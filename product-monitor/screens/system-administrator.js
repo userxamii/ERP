@@ -71,12 +71,13 @@ function renderUserManagement() {
                 <div>
                     <p class="eyebrow">ACCOUNT DIRECTORY</p>
                     <h3>User accounts</h3>
+                    <p class="admin-table-note">Set a temporary password for each new user. They must choose a new password at first sign-in.</p>
                     <p id="adminUsersStatus" class="admin-table-note" role="status">Loading accounts…</p>
                 </div>
                 <details class="admin-add-user">
                     <summary class="secondary-button">Add user</summary>
                     <form class="admin-user-form" data-admin-user-form="create">
-                        ${renderUserFields()}
+                        ${renderUserFields({}, false)}
                         <button class="primary-button" type="submit">Create account</button>
                     </form>
                 </details>
@@ -93,7 +94,7 @@ function renderUserManagement() {
     `;
 }
 
-function renderUserFields(user = {}) {
+function renderUserFields(user = {}, isEdit = true) {
     const roleOptions = Object.keys(rolePermissions).map(role => `
         <option value="${escapeHTML(role)}" ${user.role === role ? "selected" : ""}>${escapeHTML(role)}</option>
     `).join("");
@@ -103,6 +104,7 @@ function renderUserFields(user = {}) {
         <label><span>Email / Username</span><input name="email" type="email" value="${escapeHTML(user.email || "")}" maxlength="255" required></label>
         <label><span>Role</span><select name="role" required>${roleOptions}</select></label>
         <label><span>Department</span><input name="department" value="${escapeHTML(user.department || "")}" maxlength="100"></label>
+        ${isEdit ? "" : '<label><span>Temporary password</span><input name="password" type="password" autocomplete="new-password" minlength="8" required></label>'}
     `;
 }
 
@@ -116,7 +118,7 @@ function renderUserRows(users) {
         const editId = `admin-user-edit-${user.id}`;
 
         return `
-            <tr>
+            <tr data-admin-user-id="${escapeHTML(user.id)}">
                 <td>${escapeHTML(user.id)}</td>
                 <td>
                     <button class="admin-user-toggle" type="button" data-admin-user-toggle="${escapeHTML(user.id)}" aria-expanded="false" aria-controls="${escapeHTML(detailsId)}">
@@ -130,7 +132,6 @@ function renderUserRows(users) {
                 <td>${escapeHTML(formatAdminDate(user.createdAt))}</td>
                 <td class="admin-user-actions">
                     <button type="button" class="table-action" data-admin-action="edit" data-user-id="${escapeHTML(user.id)}" aria-expanded="false" aria-controls="${escapeHTML(editId)}">Edit</button>
-                    <button type="button" class="table-action" data-admin-action="reset-password" data-user-id="${escapeHTML(user.id)}">Reset password</button>
                     <button type="button" class="table-action" data-admin-action="toggle-status" data-user-id="${escapeHTML(user.id)}" data-is-active="${user.isActive ? "true" : "false"}">${user.isActive ? "Deactivate" : "Activate"}</button>
                 </td>
             </tr>
@@ -262,7 +263,7 @@ export async function loadSystemAdministratorDashboard(target) {
     }
 }
 
-export async function loadSystemAdministratorUsers(target) {
+export async function loadSystemAdministratorUsers(target, newlyCreatedUserId = null) {
     const status = target.querySelector("#adminUsersStatus");
     const rows = target.querySelector("#adminUserRows");
 
@@ -315,8 +316,26 @@ export async function loadSystemAdministratorUsers(target) {
                     isEdit ? "PATCH" : "POST",
                     data,
                 );
-                await loadSystemAdministratorUsers(target);
+                await loadSystemAdministratorUsers(target, isEdit ? null : payload.user?.id ?? null);
                 target.querySelector("#adminUsersStatus").textContent = payload.message || "Account saved.";
+
+                if (!isEdit) {
+                    form.reset();
+                    form.closest("details")?.removeAttribute("open");
+                    const successToast = target.querySelector(".admin-user-success-toast");
+
+                    if (successToast) {
+                        successToast.textContent = "User added!";
+                        successToast.hidden = false;
+                        successToast.classList.remove("visible");
+                        successToast.addEventListener("animationend", () => {
+                            successToast.hidden = true;
+                            successToast.classList.remove("visible");
+                        }, { once: true });
+                        void successToast.offsetWidth;
+                        successToast.classList.add("visible");
+                    }
+                }
             } catch (error) {
                 target.querySelector("#adminUsersStatus").textContent = error instanceof Error ? error.message : "Unable to save the account.";
                 target.querySelector("#adminUsersStatus").classList.add("admin-error");
@@ -346,10 +365,7 @@ export async function loadSystemAdministratorUsers(target) {
 
             actionButton.disabled = true;
             try {
-                if (adminAction === "reset-password") {
-                    const payload = await administratorRequest(`/warehouse/admin/users/${encodeURIComponent(userId)}/password-reset`, "POST", {});
-                    target.querySelector("#adminUsersStatus").textContent = payload.message;
-                } else if (adminAction === "toggle-status") {
+                if (adminAction === "toggle-status") {
                     const isActive = actionButton.dataset.isActive === "true";
                     await administratorRequest(`/warehouse/admin/users/${encodeURIComponent(userId)}`, "PATCH", {
                         is_active: !isActive,
@@ -375,6 +391,10 @@ export async function loadSystemAdministratorUsers(target) {
         }
 
         rows.innerHTML = renderUserRows(payload.users);
+        if (newlyCreatedUserId !== null) {
+            const createdUserRow = rows.querySelector(`[data-admin-user-id="${CSS.escape(String(newlyCreatedUserId))}"]`);
+            createdUserRow?.classList.add("admin-user-added");
+        }
         status.textContent = `${payload.users.length} account${payload.users.length === 1 ? "" : "s"} found.`;
     } catch (error) {
         const message = error instanceof Error ? error.message : "An unexpected error occurred.";
@@ -396,6 +416,7 @@ export function renderSystemAdministratorScreen(page = "dashboard") {
 
     return `
         <div class="admin-workspace">
+            <p class="admin-user-success-toast" role="status" aria-live="polite" hidden></p>
             ${renderSectionNavigation(section.page)}
             ${renderAdminPageHeader(section)}
             ${renderPage()}

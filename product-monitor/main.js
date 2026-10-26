@@ -1,11 +1,11 @@
 import { renderDashboardScreen, renderProcurementDashboardScreen } from './screens/dashboard.js';
 import { renderInventoryScreen } from './screens/inventory.js';
 import { renderOperationsScreen } from './screens/operations.js';
-import { renderAlertsScreen } from './screens/alerts.js';
+import { renderAlertsScreen } from './screens/alerts.js?v=alerts-unread-count-2';
 import { renderSettingsScreen } from './screens/settings.js';
-import { renderLoginScreen, renderSignupScreen } from './screens/auth.js';
+import { renderChangePasswordScreen, renderLoginScreen } from './screens/auth.js?v=temporary-password-required-1';
 import { salesDistributionStaff } from './screens/sales-and-distribution-staff.js';
-import { systemAdministrator } from './screens/system-administrator.js?v=admin-functions-3';
+import { systemAdministrator } from './screens/system-administrator.js?v=temporary-password-required-1';
 import { warehouseStaff } from './screens/warehouse-staff.js';
 import { procurementStaff } from './screens/procurement-staff.js?v=procurement-functions-3';
 import { productionStaff } from './screens/production-staff.js?v=production-functions-1';
@@ -13,7 +13,7 @@ import { managementWorkspace } from './screens/management.js?v=management-worksp
 
 window.salesDistributionStaff = salesDistributionStaff;
 window.renderLoginPage = renderLoginScreen;
-window.renderSignupPage = renderSignupScreen;
+window.renderChangePasswordPage = renderChangePasswordScreen;
 
 const pageHandlers = {
     dashboard: () => {
@@ -83,6 +83,15 @@ function applyScreenRouting() {
 
         if (target && typeof content === 'string') {
             target.innerHTML = content;
+            window.updateAlertCounts();
+
+            if (window.authState && window.authState.role === 'System Administrator') {
+                if (safePage === 'dashboard') {
+                    systemAdministrator.loadDashboard(target);
+                } else if (safePage === 'admin-users') {
+                    systemAdministrator.loadUsers(target);
+                }
+            }
 
             if (['inventory', 'aging', 'expiring'].includes(safePage)) {
                 window.renderInventoryRows(safePage);
@@ -118,17 +127,7 @@ function applyScreenRouting() {
 
     if (typeof window.showAuthMode === 'function') {
         const originalAuthMode = window.showAuthMode;
-        window.showAuthMode = function showAuthMode(mode, message = '', email = '') {
-            if (mode === 'signup') {
-                const content = renderSignupScreen(message);
-                const target = window.appView || document.getElementById('appView');
-
-                if (target && typeof content === 'string') {
-                    target.innerHTML = content;
-                    return;
-                }
-            }
-
+        window.showAuthMode = function showAuthMode(message = '', email = '') {
             const content = renderLoginScreen(message, email);
             const target = window.appView || document.getElementById('appView');
 
@@ -137,7 +136,7 @@ function applyScreenRouting() {
                 return;
             }
 
-            return originalAuthMode(mode, message, email);
+            return originalAuthMode(message, email);
         };
     }
 }
