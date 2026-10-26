@@ -3,42 +3,16 @@
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-test('signup stores the selected role and a hashed password in the users table', function () {
-    $response = $this->postJson(route('warehouse.auth.register'), [
+test('warehouse self-registration endpoint is unavailable', function () {
+    $this->postJson('/warehouse/auth/register', [
         'name' => 'Finance User',
         'email' => 'finance@example.com',
         'role' => 'Finance Staff',
         'password' => 'warehouse-password',
         'password_confirmation' => 'warehouse-password',
-    ]);
+    ])->assertNotFound();
 
-    $response->assertCreated()
-        ->assertJsonPath('message', 'Account created. Sign in with your new email and password.');
-
-    $user = User::query()->where('email', 'finance@example.com')->firstOrFail();
-
-    $this->assertDatabaseHas('users', [
-        'id' => $user->id,
-        'role' => 'Finance Staff',
-    ]);
-    $this->assertModelExists($user);
-    expect(Hash::check('warehouse-password', $user->password))->toBeTrue();
-    $this->assertGuest();
-});
-
-test('signup rejects roles that are not offered by the warehouse workspace', function () {
-    $response = $this->postJson(route('warehouse.auth.register'), [
-        'name' => 'Unauthorized User',
-        'email' => 'invalid-role@example.com',
-        'role' => 'Owner',
-        'password' => 'warehouse-password',
-        'password_confirmation' => 'warehouse-password',
-    ]);
-
-    $response->assertUnprocessable()
-        ->assertJsonValidationErrors('role');
-
-    $this->assertDatabaseMissing('users', ['email' => 'invalid-role@example.com']);
+    $this->assertDatabaseMissing('users', ['email' => 'finance@example.com']);
 });
 
 test('signup cannot assign the system administrator role', function () {
@@ -70,11 +44,96 @@ test('sign-in authenticates the saved account and returns its assigned role', fu
 
     $response->assertOk()
         ->assertJsonPath('user.email', 'qa@example.com')
-        ->assertJsonPath('user.role', 'Quality Assurance (QA)');
+        ->assertJsonPath('user.role', 'Quality Assurance (QA)')
+        ->assertJsonPath('mustChangePassword', false);
 
     $this->assertAuthenticatedAs($user);
 });
 
+<<<<<<< HEAD
+=======
+test('first sign-in requires changing the temporary password before workspace access', function () {
+    $user = User::factory()->create([
+        'email' => 'new.staff@example.com',
+        'password' => 'temporary-password',
+        'must_change_password' => true,
+    ]);
+
+    $this->postJson(route('warehouse.auth.login'), [
+        'email' => $user->email,
+        'password' => 'temporary-password',
+    ])->assertOk()
+        ->assertJsonPath('mustChangePassword', true)
+        ->assertJsonPath('workspaceState.productStatuses', [])
+        ->assertJsonPath('workspaceState.readAlertIds', []);
+
+    $this->getJson(route('warehouse.admin.dashboard'))
+        ->assertStatus(423)
+        ->assertJsonPath('mustChangePassword', true);
+
+    $this->postJson(route('warehouse.auth.change-password'), [
+        'current_password' => 'temporary-password',
+        'password' => 'employee-private-password',
+        'password_confirmation' => 'employee-private-password',
+    ])->assertOk()
+        ->assertJsonPath('mustChangePassword', false);
+
+    $this->assertDatabaseHas('users', [
+        'id' => $user->id,
+        'must_change_password' => false,
+    ]);
+    expect(Hash::check('employee-private-password', $user->fresh()->password))->toBeTrue();
+
+    $this->postJson(route('warehouse.auth.logout'))->assertOk();
+    $this->postJson(route('warehouse.auth.login'), [
+        'email' => $user->email,
+        'password' => 'employee-private-password',
+    ])->assertOk()
+        ->assertJsonPath('mustChangePassword', false);
+});
+
+test('temporary password cannot be changed with an incorrect current password', function () {
+    $user = User::factory()->create([
+        'password' => 'temporary-password',
+        'must_change_password' => true,
+    ]);
+
+    $this->actingAs($user)
+        ->postJson(route('warehouse.auth.change-password'), [
+            'current_password' => 'incorrect-password',
+            'password' => 'employee-private-password',
+            'password_confirmation' => 'employee-private-password',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('current_password');
+
+    $this->assertDatabaseHas('users', [
+        'id' => $user->id,
+        'must_change_password' => true,
+    ]);
+});
+
+test('users who are not required to change their password cannot use the forced-change endpoint', function () {
+    $user = User::factory()->create([
+        'password' => 'current-password',
+        'must_change_password' => false,
+    ]);
+
+    $this->actingAs($user)
+        ->postJson(route('warehouse.auth.change-password'), [
+            'current_password' => 'current-password',
+            'password' => 'new-private-password',
+            'password_confirmation' => 'new-private-password',
+        ])
+        ->assertStatus(409);
+
+    $this->assertDatabaseHas('users', [
+        'id' => $user->id,
+        'must_change_password' => false,
+    ]);
+});
+
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
 test('successful and failed warehouse sign-ins are recorded for administrator activity', function () {
     User::factory()->create([
         'email' => 'activity@example.com',

@@ -41,6 +41,10 @@ class User extends Authenticatable
         'role',
         'department',
         'is_active',
+<<<<<<< HEAD
+=======
+        'must_change_password',
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
     ];
 
     /**
@@ -64,6 +68,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+<<<<<<< HEAD
+=======
+            'must_change_password' => 'boolean',
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
         ];
     }
 

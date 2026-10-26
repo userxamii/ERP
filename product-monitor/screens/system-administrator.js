@@ -1,6 +1,11 @@
 const adminSections = [
+<<<<<<< HEAD
     { page: "dashboard", label: "Admin Dashboard", description: "System administration overview." },
     { page: "admin-users", label: "User Management", description: "Review registered accounts and their roles." },
+=======
+    { page: "dashboard", label: "Dashboard" },
+    { page: "admin-users", label: "User Management" },
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
 ];
 
 function renderSectionNavigation(activePage) {
@@ -15,6 +20,7 @@ function renderSectionNavigation(activePage) {
     `;
 }
 
+<<<<<<< HEAD
 function renderAdminPageHeader(section) {
     return `
         <div class="admin-page-heading">
@@ -27,6 +33,8 @@ function renderAdminPageHeader(section) {
     `;
 }
 
+=======
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
 function renderAdminDashboard() {
     const roleCount = Object.keys(rolePermissions).length;
 
@@ -41,6 +49,7 @@ function renderAdminDashboard() {
 
         <section class="panel">
             <div class="panel-heading">
+<<<<<<< HEAD
                 <div>
                     <p class="eyebrow">SERVICE HEALTH</p>
                     <h2>API and database status</h2>
@@ -54,6 +63,8 @@ function renderAdminDashboard() {
 
         <section class="panel">
             <div class="panel-heading">
+=======
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
                 <div><p class="eyebrow">RECENT SYSTEM ACTIVITY</p><h2>Login and account activity</h2></div>
                 <a class="text-link" href="#admin-users" data-page="admin-users">Manage users <span aria-hidden="true">→</span></a>
             </div>
@@ -71,12 +82,20 @@ function renderUserManagement() {
                 <div>
                     <p class="eyebrow">ACCOUNT DIRECTORY</p>
                     <h3>User accounts</h3>
+<<<<<<< HEAD
+=======
+                    <p class="admin-table-note">Set a temporary password for each new user. They must choose a new password at first sign-in.</p>
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
                     <p id="adminUsersStatus" class="admin-table-note" role="status">Loading accounts…</p>
                 </div>
                 <details class="admin-add-user">
                     <summary class="secondary-button">Add user</summary>
                     <form class="admin-user-form" data-admin-user-form="create">
+<<<<<<< HEAD
                         ${renderUserFields()}
+=======
+                        ${renderUserFields({}, false)}
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
                         <button class="primary-button" type="submit">Create account</button>
                     </form>
                 </details>
@@ -93,7 +112,11 @@ function renderUserManagement() {
     `;
 }
 
+<<<<<<< HEAD
 function renderUserFields(user = {}) {
+=======
+function renderUserFields(user = {}, isEdit = true) {
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
     const roleOptions = Object.keys(rolePermissions).map(role => `
         <option value="${escapeHTML(role)}" ${user.role === role ? "selected" : ""}>${escapeHTML(role)}</option>
     `).join("");
@@ -103,6 +126,10 @@ function renderUserFields(user = {}) {
         <label><span>Email / Username</span><input name="email" type="email" value="${escapeHTML(user.email || "")}" maxlength="255" required></label>
         <label><span>Role</span><select name="role" required>${roleOptions}</select></label>
         <label><span>Department</span><input name="department" value="${escapeHTML(user.department || "")}" maxlength="100"></label>
+<<<<<<< HEAD
+=======
+        ${isEdit ? "" : '<label><span>Temporary password</span><input name="password" type="password" autocomplete="new-password" minlength="8" required></label>'}
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
     `;
 }
 
@@ -116,7 +143,11 @@ function renderUserRows(users) {
         const editId = `admin-user-edit-${user.id}`;
 
         return `
+<<<<<<< HEAD
             <tr>
+=======
+            <tr data-admin-user-id="${escapeHTML(user.id)}">
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
                 <td>${escapeHTML(user.id)}</td>
                 <td>
                     <button class="admin-user-toggle" type="button" data-admin-user-toggle="${escapeHTML(user.id)}" aria-expanded="false" aria-controls="${escapeHTML(detailsId)}">
@@ -130,7 +161,10 @@ function renderUserRows(users) {
                 <td>${escapeHTML(formatAdminDate(user.createdAt))}</td>
                 <td class="admin-user-actions">
                     <button type="button" class="table-action" data-admin-action="edit" data-user-id="${escapeHTML(user.id)}" aria-expanded="false" aria-controls="${escapeHTML(editId)}">Edit</button>
+<<<<<<< HEAD
                     <button type="button" class="table-action" data-admin-action="reset-password" data-user-id="${escapeHTML(user.id)}">Reset password</button>
+=======
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
                     <button type="button" class="table-action" data-admin-action="toggle-status" data-user-id="${escapeHTML(user.id)}" data-is-active="${user.isActive ? "true" : "false"}">${user.isActive ? "Deactivate" : "Activate"}</button>
                 </td>
             </tr>
@@ -240,6 +274,7 @@ export async function loadSystemAdministratorDashboard(target) {
         });
         status.textContent = "Updated just now. Login counts cover the last 24 hours.";
 
+<<<<<<< HEAD
         for (const [id, state] of [["adminApiHealth", payload.health.api], ["adminDatabaseHealth", payload.health.database]]) {
             const indicator = target.querySelector(`#${id}`);
             if (indicator) {
@@ -249,6 +284,8 @@ export async function loadSystemAdministratorDashboard(target) {
             }
         }
 
+=======
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
         const activity = target.querySelector("#adminRecentActivity");
         if (activity) {
             activity.innerHTML = renderAdminActivity(payload.recentActivity || []);
@@ -262,7 +299,11 @@ export async function loadSystemAdministratorDashboard(target) {
     }
 }
 
+<<<<<<< HEAD
 export async function loadSystemAdministratorUsers(target) {
+=======
+export async function loadSystemAdministratorUsers(target, newlyCreatedUserId = null) {
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
     const status = target.querySelector("#adminUsersStatus");
     const rows = target.querySelector("#adminUserRows");
 
@@ -315,8 +356,31 @@ export async function loadSystemAdministratorUsers(target) {
                     isEdit ? "PATCH" : "POST",
                     data,
                 );
+<<<<<<< HEAD
                 await loadSystemAdministratorUsers(target);
                 target.querySelector("#adminUsersStatus").textContent = payload.message || "Account saved.";
+=======
+                await loadSystemAdministratorUsers(target, isEdit ? null : payload.user?.id ?? null);
+                target.querySelector("#adminUsersStatus").textContent = payload.message || "Account saved.";
+
+                if (!isEdit) {
+                    form.reset();
+                    form.closest("details")?.removeAttribute("open");
+                    const successToast = target.querySelector(".admin-user-success-toast");
+
+                    if (successToast) {
+                        successToast.textContent = "User added!";
+                        successToast.hidden = false;
+                        successToast.classList.remove("visible");
+                        successToast.addEventListener("animationend", () => {
+                            successToast.hidden = true;
+                            successToast.classList.remove("visible");
+                        }, { once: true });
+                        void successToast.offsetWidth;
+                        successToast.classList.add("visible");
+                    }
+                }
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
             } catch (error) {
                 target.querySelector("#adminUsersStatus").textContent = error instanceof Error ? error.message : "Unable to save the account.";
                 target.querySelector("#adminUsersStatus").classList.add("admin-error");
@@ -346,10 +410,14 @@ export async function loadSystemAdministratorUsers(target) {
 
             actionButton.disabled = true;
             try {
+<<<<<<< HEAD
                 if (adminAction === "reset-password") {
                     const payload = await administratorRequest(`/warehouse/admin/users/${encodeURIComponent(userId)}/password-reset`, "POST", {});
                     target.querySelector("#adminUsersStatus").textContent = payload.message;
                 } else if (adminAction === "toggle-status") {
+=======
+                if (adminAction === "toggle-status") {
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
                     const isActive = actionButton.dataset.isActive === "true";
                     await administratorRequest(`/warehouse/admin/users/${encodeURIComponent(userId)}`, "PATCH", {
                         is_active: !isActive,
@@ -375,6 +443,13 @@ export async function loadSystemAdministratorUsers(target) {
         }
 
         rows.innerHTML = renderUserRows(payload.users);
+<<<<<<< HEAD
+=======
+        if (newlyCreatedUserId !== null) {
+            const createdUserRow = rows.querySelector(`[data-admin-user-id="${CSS.escape(String(newlyCreatedUserId))}"]`);
+            createdUserRow?.classList.add("admin-user-added");
+        }
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
         status.textContent = `${payload.users.length} account${payload.users.length === 1 ? "" : "s"} found.`;
     } catch (error) {
         const message = error instanceof Error ? error.message : "An unexpected error occurred.";
@@ -396,8 +471,13 @@ export function renderSystemAdministratorScreen(page = "dashboard") {
 
     return `
         <div class="admin-workspace">
+<<<<<<< HEAD
             ${renderSectionNavigation(section.page)}
             ${renderAdminPageHeader(section)}
+=======
+            <p class="admin-user-success-toast" role="status" aria-live="polite" hidden></p>
+            ${renderSectionNavigation(section.page)}
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
             ${renderPage()}
         </div>
     `;

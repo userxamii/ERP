@@ -3,17 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#020a11">
+    <meta name="theme-color" content="#0F3D3A">
     <title>User Screens & Role Requirements</title>
+<<<<<<< HEAD
     <link rel="stylesheet" href="/product-monitor/style.css?v=admin-functions-3">
     <link rel="modulepreload" href="/product-monitor/screens/auth.js">
+=======
+    <link rel="stylesheet" href="/product-monitor/style.css?v=distribution-admin-merge-1">
+    <link rel="modulepreload" href="/product-monitor/screens/auth.js?v=temporary-password-required-1">
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
     <link rel="modulepreload" href="/product-monitor/screens/dashboard.js">
     <link rel="modulepreload" href="/product-monitor/screens/inventory.js">
     <link rel="modulepreload" href="/product-monitor/screens/operations.js">
-    <link rel="modulepreload" href="/product-monitor/screens/alerts.js">
+    <link rel="modulepreload" href="/product-monitor/screens/alerts.js?v=alerts-unread-count-2">
     <link rel="modulepreload" href="/product-monitor/screens/settings.js">
     <link rel="modulepreload" href="/product-monitor/screens/sales-and-distribution-staff.js">
+<<<<<<< HEAD
     <link rel="modulepreload" href="/product-monitor/screens/system-administrator.js?v=admin-functions-3">
+=======
+    <link rel="modulepreload" href="/product-monitor/screens/system-administrator.js?v=temporary-password-required-1">
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
     <link rel="modulepreload" href="/product-monitor/screens/warehouse-staff.js">
     <link rel="modulepreload" href="/product-monitor/screens/role-dashboard.js">
 </head>
@@ -52,16 +61,6 @@
             </a>
         </nav>
 
-        <div class="sidebar-footer">
-            <a href="#settings" data-page="settings">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-                <span>Settings</span>
-            </a>
-            <a href="#logout" data-page="logout">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                <span>Logout</span>
-            </a>
-        </div>
         <div class="sidebar-user">
             <span class="avatar">WS</span>
             <span><strong>Warehouse Staff</strong><small>Inventory team</small></span>
@@ -81,10 +80,29 @@
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
                     <span id="headerAlertCount" class="notification-count" hidden></span>
                 </button>
-                <div class="profile">
-                    <span class="avatar">WS</span>
-                    <span class="profile-copy"><strong>Warehouse Staff</strong><small>Staff account</small></span>
-                    <svg class="chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                <div class="profile-menu-container">
+                    <button class="profile" id="profileMenuButton" type="button" aria-expanded="false" aria-controls="profileMenu" aria-label="Open account menu">
+                        <span class="avatar">WS</span>
+                        <span class="profile-copy"><strong>Warehouse Staff</strong><small>Staff account</small></span>
+                        <svg class="chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="profile-menu" id="profileMenu" aria-labelledby="profileMenuButton" hidden>
+                        <div class="profile-menu-account">
+                            <strong id="profileMenuName">Warehouse Staff</strong>
+                            <span id="profileMenuEmail"></span>
+                            <small id="profileMenuRole">Staff account</small>
+                        </div>
+                        <nav class="profile-menu-links" aria-label="Account">
+                            <a href="#settings" data-page="settings">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                                <span>Settings</span>
+                            </a>
+                            <a href="#logout" data-page="logout">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                                <span>Log out</span>
+                            </a>
+                        </nav>
+                    </div>
                 </div>
             </div>
         </header>
@@ -99,7 +117,12 @@
     </div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+<<<<<<< HEAD
     <script src="/product-monitor/script.js?v=admin-functions-3" defer></script>
     <script type="module" src="/product-monitor/main.js?v=admin-functions-3"></script>
+=======
+    <script src="/product-monitor/script.js?v=temporary-password-required-1" defer></script>
+    <script type="module" src="/product-monitor/main.js?v=temporary-password-required-1"></script>
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
 </body>
 </html>

@@ -8,7 +8,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 
 class WarehouseAuthController extends Controller
@@ -19,16 +20,17 @@ class WarehouseAuthController extends Controller
 
         return response()->json([
             'authenticated' => $user !== null,
-            'hasAccounts' => User::query()->exists(),
             'csrfToken' => csrf_token(),
             'user' => $user?->only(['name', 'email', 'role']),
-            'workspaceState' => $user instanceof User ? $this->workspaceState($user) : [
+            'mustChangePassword' => $user instanceof User && $user->must_change_password,
+            'workspaceState' => $user instanceof User && ! $user->must_change_password ? $this->workspaceState($user) : [
                 'productStatuses' => [],
                 'readAlertIds' => [],
             ],
         ])->header('Cache-Control', 'no-store');
     }
 
+<<<<<<< HEAD
     public function register(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -45,6 +47,8 @@ class WarehouseAuthController extends Controller
         ], 201);
     }
 
+=======
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
     public function login(LoginRequest $request): JsonResponse
     {
         $request->authenticate();
@@ -54,8 +58,36 @@ class WarehouseAuthController extends Controller
 
         return response()->json([
             'user' => $user->only(['name', 'email', 'role']),
+            'mustChangePassword' => $user->must_change_password,
             'csrfToken' => csrf_token(),
-            'workspaceState' => $this->workspaceState($user),
+            'workspaceState' => $user->must_change_password
+                ? ['productStatuses' => [], 'readAlertIds' => []]
+                : $this->workspaceState($user),
+        ]);
+    }
+
+    public function changePassword(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        abort_unless($user instanceof User, 401);
+        abort_unless($user->must_change_password, 409, 'A password change is not required for this account.');
+
+        $validated = $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults(), 'different:current_password'],
+        ]);
+
+        $user->forceFill([
+            'password' => Hash::make($validated['password']),
+            'must_change_password' => false,
+            'remember_token' => Str::random(60),
+        ])->save();
+        $request->session()->regenerate();
+
+        return response()->json([
+            'message' => 'Your password has been changed.',
+            'mustChangePassword' => false,
+            'csrfToken' => csrf_token(),
         ]);
     }
 

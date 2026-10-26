@@ -1,8 +1,15 @@
 <?php
 
+<<<<<<< HEAD
 use App\Http\Controllers\DistributionController;
 use App\Http\Controllers\SystemAdministratorController;
 use App\Http\Controllers\Warehouse\WarehouseController;
+=======
+use App\Http\Controllers\ManagementWorkspaceController;
+use App\Http\Controllers\ProcurementWorkspaceController;
+use App\Http\Controllers\ProductionWorkspaceController;
+use App\Http\Controllers\SystemAdministratorController;
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
 use App\Http\Controllers\WarehouseAuthController;
 use App\Http\Controllers\WarehouseWorkspaceController;
 use Illuminate\Support\Facades\Route;
@@ -42,30 +49,75 @@ Route::prefix('product-monitor')->group(function () {
 
 Route::prefix('warehouse/auth')->name('warehouse.auth.')->group(function () {
     Route::get('session', [WarehouseAuthController::class, 'session'])->name('session');
-    Route::post('register', [WarehouseAuthController::class, 'register'])->middleware('guest')->name('register');
     Route::post('login', [WarehouseAuthController::class, 'login'])->middleware('guest')->name('login');
+    Route::post('change-password', [WarehouseAuthController::class, 'changePassword'])->middleware('auth')->name('change-password');
     Route::post('logout', [WarehouseAuthController::class, 'logout'])->middleware('auth')->name('logout');
 });
 
-Route::prefix('warehouse/workspace')->name('warehouse.workspace.')->middleware('auth')->group(function () {
+Route::prefix('warehouse/workspace')->name('warehouse.workspace.')->middleware(['auth', 'password.changed'])->group(function () {
     Route::patch('products/{productId}/status', [WarehouseWorkspaceController::class, 'updateProductStatus'])
         ->where('productId', '[A-Za-z0-9-]+')
         ->name('products.status.update');
     Route::post('alerts/read', [WarehouseWorkspaceController::class, 'markAlertsRead'])->name('alerts.read-all');
+    Route::delete('alerts/{alertId}/read', [WarehouseWorkspaceController::class, 'markAlertUnread'])
+        ->where('alertId', '[A-Za-z0-9-]+')
+        ->name('alerts.unread');
     Route::post('alerts/{alertId}/read', [WarehouseWorkspaceController::class, 'markAlertRead'])
         ->where('alertId', '[A-Za-z0-9-]+')
         ->name('alerts.read');
 });
 
+<<<<<<< HEAD
 Route::prefix('warehouse/admin')->name('warehouse.admin.')->middleware('auth')->group(function () {
+=======
+Route::prefix('warehouse/admin')->name('warehouse.admin.')->middleware(['auth', 'password.changed'])->group(function () {
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
     Route::get('dashboard', [SystemAdministratorController::class, 'dashboard'])->name('dashboard');
     Route::get('users', [SystemAdministratorController::class, 'users'])->name('users.index');
     Route::post('users', [SystemAdministratorController::class, 'storeUser'])->name('users.store');
     Route::patch('users/{user}', [SystemAdministratorController::class, 'updateUser'])->name('users.update');
+<<<<<<< HEAD
     Route::post('users/{user}/password-reset', [SystemAdministratorController::class, 'sendPasswordReset'])->name('users.password-reset');
 });
 
 Route::middleware(['auth'])->group(function () {
+=======
+});
+
+Route::prefix('warehouse/procurement')->name('warehouse.procurement.')->middleware(['auth', 'password.changed'])->group(function () {
+    Route::get('dashboard', [ProcurementWorkspaceController::class, 'dashboard'])->name('dashboard');
+    Route::get('materials', [ProcurementWorkspaceController::class, 'materials'])->name('materials');
+    Route::get('requests', [ProcurementWorkspaceController::class, 'requests'])->name('requests');
+    Route::post('requests', [ProcurementWorkspaceController::class, 'storeRequest'])->name('requests.store');
+    Route::post('requests/{purchaseRequest}/submit', [ProcurementWorkspaceController::class, 'submitRequest'])->name('requests.submit');
+    Route::post('requests/{purchaseRequest}/decision', [ProcurementWorkspaceController::class, 'decideRequest'])->name('requests.decision');
+    Route::post('orders', [ProcurementWorkspaceController::class, 'storeOrder'])->name('orders.store');
+    Route::post('orders/{purchaseOrder}/place', [ProcurementWorkspaceController::class, 'placeOrder'])->name('orders.place');
+    Route::get('suppliers', [ProcurementWorkspaceController::class, 'suppliers'])->name('suppliers');
+    Route::post('suppliers', [ProcurementWorkspaceController::class, 'storeSupplier'])->name('suppliers.store');
+    Route::get('deliveries', [ProcurementWorkspaceController::class, 'deliveries'])->name('deliveries');
+    Route::post('deliveries', [ProcurementWorkspaceController::class, 'storeDelivery'])->name('deliveries.store');
+    Route::post('deliveries/{delivery}/receipts', [ProcurementWorkspaceController::class, 'storeReceipt'])->name('deliveries.receipts.store');
+    Route::get('reports', [ProcurementWorkspaceController::class, 'reports'])->name('reports');
+});
+
+Route::prefix('warehouse/production')->name('warehouse.production.')->middleware(['auth', 'password.changed'])->group(function () {
+    Route::get('dashboard', [ProductionWorkspaceController::class, 'dashboard'])->name('dashboard');
+    Route::get('materials', [ProductionWorkspaceController::class, 'materials'])->name('materials');
+    Route::get('requests', [ProductionWorkspaceController::class, 'requests'])->name('requests');
+    Route::post('requests', [ProductionWorkspaceController::class, 'storeRequest'])->name('requests.store');
+    Route::post('requests/{materialRequest}/decision', [ProductionWorkspaceController::class, 'decideRequest'])->name('requests.decision');
+    Route::post('requests/{materialRequest}/fulfill', [ProductionWorkspaceController::class, 'fulfillRequest'])->name('requests.fulfill');
+    Route::get('issued-materials', [ProductionWorkspaceController::class, 'issuedMaterials'])->name('issued-materials');
+    Route::get('batches', [ProductionWorkspaceController::class, 'batches'])->name('batches');
+});
+
+Route::prefix('warehouse/management')->name('warehouse.management.')->middleware(['auth', 'password.changed'])->group(function () {
+    Route::get('dashboard', [ManagementWorkspaceController::class, 'dashboard'])->name('dashboard');
+});
+
+Route::middleware(['auth', 'password.changed'])->group(function () {
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');

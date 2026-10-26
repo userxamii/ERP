@@ -8,9 +8,14 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+<<<<<<< HEAD
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+=======
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules;
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
 
 class SystemAdministratorController extends Controller
 {
@@ -83,23 +88,38 @@ class SystemAdministratorController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
             'role' => ['required', Rule::in(User::ROLES)],
             'department' => ['nullable', 'string', 'max:100'],
+<<<<<<< HEAD
+=======
+            'password' => ['required', Rules\Password::defaults()],
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
         ]);
 
         $user = User::query()->create([
             ...$validated,
+<<<<<<< HEAD
             'password' => Str::random(64),
             'is_active' => true,
         ]);
 
         $resetStatus = Password::sendResetLink(['email' => $user->email]);
+=======
+            'is_active' => true,
+            'must_change_password' => true,
+        ]);
+
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
         $this->recordActivity($actor, $user, 'user_created', "Created account for {$user->name}.");
 
         return response()->json([
             'user' => $this->userData($user),
+<<<<<<< HEAD
             'message' => $resetStatus === Password::RESET_LINK_SENT
                 ? 'Account created. A password setup link has been sent by email.'
                 : 'Account created, but a password setup email could not be sent.',
             'resetLinkSent' => $resetStatus === Password::RESET_LINK_SENT,
+=======
+            'message' => 'Account created. The user must change this temporary password at first sign-in.',
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
         ], 201);
     }
 
@@ -141,6 +161,7 @@ class SystemAdministratorController extends Controller
         ]);
     }
 
+<<<<<<< HEAD
     public function sendPasswordReset(Request $request, User $user): JsonResponse
     {
         $actor = $this->authorizeAdministrator($request);
@@ -159,6 +180,8 @@ class SystemAdministratorController extends Controller
         ]);
     }
 
+=======
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
     private function authorizeAdministrator(Request $request): User
     {
         $user = $request->user();

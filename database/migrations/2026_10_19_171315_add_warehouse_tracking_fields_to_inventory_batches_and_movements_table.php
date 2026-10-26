@@ -6,9 +6,12 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+<<<<<<< HEAD
     /**
      * Run the migrations.
      */
+=======
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
     public function up(): void
     {
         Schema::table('inventory_batches', function (Blueprint $table) {
@@ -23,9 +26,12 @@ return new class extends Migration
         });
     }
 
+<<<<<<< HEAD
     /**
      * Reverse the migrations.
      */
+=======
+>>>>>>> 28aff9e (Integrate connected ERP workflows and sample data)
     public function down(): void
     {
         Schema::table('inventory_movements', function (Blueprint $table) {
