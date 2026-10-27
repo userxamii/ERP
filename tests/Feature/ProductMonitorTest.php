@@ -84,6 +84,25 @@ test('administrator dashboard omits its standalone heading and updated note', fu
         ->not->toContain('Updated just now. Login counts cover the last 24 hours.');
 });
 
+test('management report tabs scroll to their sections without changing application routes', function () {
+    $managementScreen = file_get_contents(base_path('product-monitor/screens/management.js'));
+
+    expect($managementScreen)
+        ->toContain('href="#management-analytics" data-management-section-link')
+        ->toContain('href="#management-departments" data-management-section-link')
+        ->toContain('href="#management-decisions" data-management-section-link')
+        ->not->toContain('Report center')
+        ->not->toContain('REPORT CENTER')
+        ->not->toContain('data-management-download')
+        ->toContain('event.preventDefault();')
+        ->toContain('section.scrollIntoView(')
+        ->toContain('sectionLink.setAttribute("aria-current", "location");')
+        ->toContain('id="management-analytics"')
+        ->toContain('id="management-departments"')
+        ->toContain('id="management-decisions"')
+        ->not->toContain('management-report-center');
+});
+
 test('new users are required to change their temporary password before using the workspace', function () {
     $authScreen = file_get_contents(base_path('product-monitor/screens/auth.js'));
     $applicationScript = file_get_contents(base_path('product-monitor/script.js'));

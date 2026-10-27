@@ -9,7 +9,7 @@ import { systemAdministrator } from './screens/system-administrator.js?v=remove-
 import { warehouseStaff } from './screens/warehouse-staff.js';
 import { procurementStaff } from './screens/procurement-staff.js?v=procurement-functions-3';
 import { productionStaff } from './screens/production-staff.js?v=production-functions-1';
-import { managementWorkspace } from './screens/management.js?v=management-workspace-1';
+import { managementWorkspace } from './screens/management.js?v=management-report-center-removed-1';
 
 window.salesDistributionStaff = salesDistributionStaff;
 window.renderLoginPage = renderLoginScreen;

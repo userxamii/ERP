@@ -4,7 +4,13 @@ use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
-test('database seeder can run repeatedly without duplicating the default account', function () {
+test('database seeder creates repeatable ERP data without adding users', function () {
+    $existingUser = User::factory()->create([
+        'email' => 'test@example.com',
+        'role' => 'Warehouse Staff',
+    ]);
+    $userCount = User::query()->count();
+
     Artisan::call('db:seed', [
         '--class' => DatabaseSeeder::class,
         '--no-interaction' => true,
@@ -15,11 +21,9 @@ test('database seeder can run repeatedly without duplicating the default account
         '--no-interaction' => true,
     ]);
 
-    $user = User::query()->where('email', 'test@example.com')->firstOrFail();
-
-    expect(User::query()->where('email', 'test@example.com')->count())->toBe(1)
-        ->and($user->name)->toBe('Test User')
-        ->and($user->role)->toBe('Warehouse Staff')
+    expect(User::query()->count())->toBe($userCount)
+        ->and($existingUser->fresh()->role)->toBe('Warehouse Staff')
+        ->and(User::query()->where('email', 'like', 'sample.%@example.test')->exists())->toBeFalse()
         ->and(DB::table('purchase_orders')->where('order_number', 'SAMPLE-PO-04')->count())->toBe(1)
         ->and(DB::table('goods_receipts')->where('receipt_number', 'SAMPLE-GR-04')->count())->toBe(1)
         ->and(DB::table('purchase_order_items')
@@ -32,10 +36,6 @@ test('database seeder can run repeatedly without duplicating the default account
             ->where('movement_type', 'stock_out')
             ->where('source_reference', 'SAMPLE-PMR-04')
             ->count())->toBe(1)
-        ->and(DB::table('users')
-            ->join('departments', 'users.department_id', '=', 'departments.id')
-            ->where('users.email', 'sample.production@example.test')
-            ->value('departments.name'))->toBe('Production')
         ->and(DB::table('inventory_batches')
             ->where('storage_location', 'SAMPLE-WH-01 / A-01')
             ->count())->toBeGreaterThan(0);
@@ -56,5 +56,16 @@ test('database seeder preserves an existing account with the default email', fun
     expect($existingUser->fresh()->name)->toBe('Registered Finance User')
         ->and($existingUser->fresh()->role)->toBe('Finance Staff')
         ->and(User::query()->where('email', 'test@example.com')->count())->toBe(1)
-        ->and(DB::table('departments')->where('name', 'Production')->exists())->toBeTrue();
+        ->and(DB::table('purchase_orders')->where('order_number', 'SAMPLE-PO-04')->exists())->toBeTrue();
+});
+
+test('database seeder leaves users empty when no users exist', function () {
+    Artisan::call('db:seed', [
+        '--class' => DatabaseSeeder::class,
+        '--no-interaction' => true,
+    ]);
+
+    expect(User::query()->count())->toBe(0)
+        ->and(DB::table('purchase_orders')->where('order_number', 'like', 'SAMPLE-%')->exists())->toBeFalse()
+        ->and(Artisan::output())->toContain('Create a real user and run db:seed again.');
 });

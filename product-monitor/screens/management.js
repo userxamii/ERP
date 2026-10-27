@@ -1,5 +1,4 @@
 const managementEndpoint = "/warehouse/management/dashboard";
-let latestManagementData = null;
 
 function escape(value) {
     return escapeHTML(value ?? "—");
@@ -127,10 +126,9 @@ function renderDashboard(data) {
             ${renderFilters(data)}
             ${renderMetrics(data.summary)}
             <nav class="management-section-links" aria-label="Management report sections">
-                <a href="#management-analytics">Analytics</a>
-                <a href="#management-departments">Department reports</a>
-                <a href="#management-decisions">Alerts &amp; decisions</a>
-                <a href="#management-report-center">Report center</a>
+                <a href="#management-analytics" data-management-section-link aria-current="location">Analytics</a>
+                <a href="#management-departments" data-management-section-link>Department reports</a>
+                <a href="#management-decisions" data-management-section-link>Alerts &amp; decisions</a>
             </nav>
             <section id="management-analytics" class="management-section">
                 <div class="management-two-column">
@@ -163,21 +161,6 @@ function renderDashboard(data) {
                     `)}
                 </div>
             </section>
-            <section id="management-report-center" class="management-section">
-                ${renderPanel("Export filtered reports", "REPORT CENTER", `
-                    <div class="management-export">
-                        <label><span>Report</span><select name="export-report" data-management-export>
-                            <option value="inventoryReport">Inventory position</option>
-                            <option value="movementReport">Stock movement history</option>
-                            <option value="inspectionReport">QA inspections</option>
-                            <option value="productionReport">Production material requests</option>
-                        </select></label>
-                        <button class="secondary-button" type="button" data-management-download>Download CSV</button>
-                    </div>
-                    <p class="management-source-note">Inventory position is a current snapshot because historical stock snapshots are not tracked; date filters apply to event reports. Values are estimates from linked purchase-order costs, shown separately by currency. Stock without recorded cost is left unvalued, and inventory loss write-offs are not separately tracked.</p>
-                    <p class="management-export-status" role="status" data-management-export-status></p>
-                `)}
-            </section>
         </div>
     `;
 }
@@ -201,34 +184,6 @@ function renderDepartmentReports(departments, financeNote) {
     `).join("")}</div>`;
 }
 
-function csvCell(value) {
-    const text = String(value ?? "");
-    const safeText = /^[=+\-@]/.test(text.trimStart()) ? `'${text}` : text;
-    return `"${safeText.replaceAll('"', '""')}"`;
-}
-
-function downloadCsv(data, reportName, target) {
-    const rows = data[reportName];
-    const status = target.querySelector("[data-management-export-status]");
-
-    if (!Array.isArray(rows) || rows.length === 0) {
-        status.textContent = "No rows are available for this report and filter selection.";
-        return;
-    }
-
-    const columns = Object.keys(rows[0]);
-    const csv = [columns.map(csvCell).join(","), ...rows.map(row => columns.map(column => csvCell(row[column])).join(","))].join("\r\n");
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-    link.href = url;
-    link.download = `${reportName.replace("Report", "").toLowerCase()}-${data.filters.from}-to-${data.filters.to}.csv`;
-    document.body.append(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 0);
-    status.textContent = `${number(rows.length)} rows exported.`;
-}
-
 const managementWorkspace = {
     renderDashboard() {
         return renderLoading();
@@ -238,7 +193,6 @@ const managementWorkspace = {
             return;
         }
 
-        latestManagementData = null;
         target.innerHTML = renderLoading();
         try {
             const response = await fetch(`${managementEndpoint}${query}`, {
@@ -249,9 +203,8 @@ const managementWorkspace = {
             if (!response.ok) {
                 throw new Error(data.message || `The request failed (${response.status}).`);
             }
-
             target.innerHTML = renderDashboard(data);
-            latestManagementData = data;
+            target.innerHTML = renderDashboard(data);
         } catch (error) {
             target.innerHTML = `<section class="panel"><p class="error-message" role="alert">${escape(error.message || "Could not load management reports.")}</p></section>`;
         }
@@ -270,15 +223,26 @@ document.addEventListener("submit", event => {
 });
 
 document.addEventListener("click", event => {
-    const button = event.target.closest("[data-management-download]");
-    if (!button) {
-        return;
-    }
+    const sectionLink = event.target.closest("[data-management-section-link]");
 
-    const target = document.getElementById("appView");
-    const reportName = target?.querySelector("[data-management-export]")?.value;
-    if (latestManagementData && reportName) {
-        downloadCsv(latestManagementData, reportName, target);
+    if (sectionLink) {
+        const workspace = sectionLink.closest(".management-workspace");
+        const targetId = sectionLink.getAttribute("href")?.slice(1);
+        const section = targetId ? document.getElementById(targetId) : null;
+
+        if (workspace && section && workspace.contains(section)) {
+            event.preventDefault();
+            workspace.querySelectorAll("[data-management-section-link]").forEach(link => {
+                link.removeAttribute("aria-current");
+            });
+            sectionLink.setAttribute("aria-current", "location");
+            section.scrollIntoView({
+                behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+                block: "start",
+            });
+        }
+
+        return;
     }
 });
 

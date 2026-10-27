@@ -28,7 +28,6 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class SampleErpDataSeeder extends Seeder
 {
@@ -71,8 +70,8 @@ class SampleErpDataSeeder extends Seeder
     public function run(): void
     {
         $departments = $this->seedDepartments();
-        $roles = $this->seedRoles();
-        $actors = $this->seedActors($departments, $roles);
+        $this->seedRoles();
+        $actors = $this->seedActors($departments);
         $materials = $this->seedMaterials();
         $supplier = $this->seedSupplier();
         $supplierMaterials = $this->seedSupplierMaterials($supplier, $materials);
@@ -164,43 +163,35 @@ class SampleErpDataSeeder extends Seeder
 
     /**
      * @param  array<string, int>  $departmentIds
-     * @param  array<string, int>  $roleIds
      * @return array{production: User, procurement: User, warehouse: User, quality: User, management: User, finance: User, distribution: User}
      */
-    private function seedActors(array $departmentIds, array $roleIds): array
+    private function seedActors(array $departmentIds): array
     {
         $actorData = [
-            'production' => ['Sample Production Operator', 'production', 'Production Staff', 'Production'],
-            'procurement' => ['Sample Procurement Officer', 'procurement', 'Procurement Staff', 'Procurement'],
-            'warehouse' => ['Sample Warehouse Operator', 'warehouse', 'Warehouse Staff', 'Warehouse'],
-            'quality' => ['Sample Quality Inspector', 'quality', 'Quality Assurance (QA)', 'Quality Assurance'],
-            'management' => ['Sample Manager', 'management', 'Management', 'Management'],
-            'finance' => ['Sample Finance Analyst', 'finance', 'Finance Staff', 'Finance'],
-            'distribution' => ['Sample Distribution Coordinator', 'distribution', 'Sales & Distribution Staff', 'Sales & Distribution'],
+            'production' => ['Production Staff', 'Production'],
+            'procurement' => ['Procurement Staff', 'Procurement'],
+            'warehouse' => ['Warehouse Staff', 'Warehouse'],
+            'quality' => ['Quality Assurance (QA)', 'Quality Assurance'],
+            'management' => ['Management', 'Management'],
+            'finance' => ['Finance Staff', 'Finance'],
+            'distribution' => ['Sales & Distribution Staff', 'Sales & Distribution'],
         ];
+        $users = User::query()->get();
+
+        if ($users->isEmpty()) {
+            throw new \RuntimeException(
+                'Sample ERP transactions require at least one existing user. The seeder does not create or modify users.',
+            );
+        }
+
         $actors = [];
 
-        foreach ($actorData as $key => [$name, $emailName, $role, $department]) {
-            $email = "sample.{$emailName}@example.test";
-            $actor = User::query()->where('email', $email)->first();
-
-            if ($actor === null) {
-                $actor = new User;
-                $actor->forceFill([
-                    'name' => $name,
-                    'email' => $email,
-                    'password' => Str::random(64),
-                    'role' => $role,
-                    'department' => $department,
-                    'role_id' => $roleIds[$role],
-                    'department_id' => $departmentIds[$department],
-                    'is_active' => true,
-                    'must_change_password' => true,
-                ]);
-                $actor->save();
-            }
-
-            $actors[$key] = $actor;
+        foreach ($actorData as $key => [$role, $department]) {
+            $actors[$key] = $users->first(
+                fn (User $user): bool => $user->department_id === $departmentIds[$department],
+            ) ?? $users->first(
+                fn (User $user): bool => $user->role === $role,
+            ) ?? $users->first();
         }
 
         return $actors;
