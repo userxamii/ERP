@@ -1543,8 +1543,6 @@ h3 {
     z-index: 20;
     inset: 0;
     display: grid;
-    width: 100vw;
-    min-height: 100vh;
     place-items: center;
     padding: 36px 20px;
     overflow-y: auto;
@@ -4617,8 +4615,7 @@ body[data-role="Procurement Staff"] .text-link:focus-visible {
     background: var(--cream-surface);
 }
 
-.management-filters label,
-.management-export label {
+.management-filters label {
     display: grid;
     gap: 6px;
     color: var(--green);
@@ -4627,8 +4624,7 @@ body[data-role="Procurement Staff"] .text-link:focus-visible {
 }
 
 .management-filters input,
-.management-filters select,
-.management-export select {
+.management-filters select {
     min-width: 0;
     height: 36px;
     padding: 0 9px;
@@ -4641,8 +4637,7 @@ body[data-role="Procurement Staff"] .text-link:focus-visible {
 }
 
 .management-filters input:focus,
-.management-filters select:focus,
-.management-export select:focus {
+.management-filters select:focus {
     outline: none;
     border-color: var(--green);
     box-shadow: 0 0 0 3px rgba(15, 61, 58, 0.15);
@@ -4685,7 +4680,7 @@ body[data-role="Procurement Staff"] .text-link:focus-visible {
 
 .management-section {
     display: grid;
-    scroll-margin-top: 20px;
+    scroll-margin-top: 76px;
     gap: 14px;
 }
 
@@ -4721,6 +4716,10 @@ body[data-role="Procurement Staff"] .text-link:focus-visible {
 .management-section-links a:hover {
     background: var(--cream);
     color: var(--green);
+}
+
+.management-section-links a[aria-current="location"] {
+    background: var(--cream);
 }
 
 .management-bars {
@@ -4803,30 +4802,14 @@ body[data-role="Procurement Staff"] .text-link:focus-visible {
 }
 
 .management-alert span,
-.management-source-note,
-.management-export-status {
+.management-source-note {
     color: var(--muted);
     font-size: 10px;
     line-height: 1.5;
 }
 
-.management-export {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: end;
-    gap: 10px;
-}
-
-.management-export label {
-    min-width: min(280px, 100%);
-}
-
 .management-source-note {
     margin: 12px 0 0;
-}
-
-.management-export-status {
-    margin: 8px 0 0;
 }
 
 @media (max-width: 960px) {

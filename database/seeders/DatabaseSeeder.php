@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -15,15 +14,14 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(ProcurementProductSeeder::class);
 
-        User::query()->firstOrCreate(
-            ['email' => 'test@example.com'],
-            [
-                'name' => 'Test User',
-                'password' => 'password',
-                'role' => 'Warehouse Staff',
-            ],
-        );
+        if (User::query()->exists()) {
+            $this->call(SampleErpDataSeeder::class);
 
-        $this->call(SampleErpDataSeeder::class);
+            return;
+        }
+
+        $this->command?->warn(
+            'Sample ERP transactions were not seeded because there are no existing users. Create a real user and run db:seed again.',
+        );
     }
 }
