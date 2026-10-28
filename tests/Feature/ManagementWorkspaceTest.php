@@ -9,7 +9,10 @@ use App\Models\MaterialCategory;
 use App\Models\ProductionMaterialRequest;
 use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestItem;
+use App\Models\UnitOfMeasure;
 use App\Models\User;
+use Carbon\CarbonImmutable;
+use Database\Seeders\AnalyticsDemoSeeder;
 
 test('management can view filtered executive inventory and movement reports', function () {
     $manager = User::factory()->create(['role' => 'Management']);
@@ -92,6 +95,83 @@ test('management reports reject date ranges longer than one year', function () {
         ]))
         ->assertUnprocessable()
         ->assertJsonValidationErrors('from');
+});
+
+test('management chart data keeps different units separate and counts materials and batches', function () {
+    $this->travelTo(CarbonImmutable::parse('2026-10-28 12:00:00'));
+    $manager = User::factory()->create(['role' => 'Management']);
+    $category = MaterialCategory::factory()->create(['name' => 'Food supplies']);
+    $kilograms = UnitOfMeasure::factory()->create(['code' => 'kg']);
+    $pieces = UnitOfMeasure::factory()->create(['code' => 'pcs']);
+    $sugar = Material::factory()->for($category, 'category')->create([
+        'unit_of_measure_id' => $kilograms->getKey(),
+    ]);
+    $bottles = Material::factory()->for($category, 'category')->create([
+        'unit_of_measure_id' => $pieces->getKey(),
+    ]);
+    $sugarBatch = InventoryBatch::factory()->for($sugar)->create([
+        'quantity_on_hand' => '100.000',
+        'received_at' => '2026-09-15 09:00:00',
+        'expires_at' => '2027-03-15',
+        'storage_location' => 'Ingredient rack',
+    ]);
+    $bottleBatch = InventoryBatch::factory()->for($bottles)->create([
+        'quantity_on_hand' => '500.000',
+        'received_at' => '2026-10-15 09:00:00',
+        'expires_at' => null,
+        'storage_location' => 'Packaging rack',
+    ]);
+    InventoryMovement::record(InventoryMovementType::WarehouseReceipt, $sugar, '120.000', '120.000', '0.000', $manager, $sugarBatch);
+    InventoryMovement::record(InventoryMovementType::StockOut, $sugar, '20.000', '-20.000', '0.000', $manager, $sugarBatch);
+    InventoryMovement::record(InventoryMovementType::WarehouseReceipt, $bottles, '500.000', '500.000', '0.000', $manager, $bottleBatch);
+
+    $this->actingAs($manager)
+        ->getJson(route('warehouse.management.dashboard', ['from' => '2026-10-01', 'to' => '2026-10-28']))
+        ->assertOk()
+        ->assertJsonPath('summary.onHandByUnit.kg', '100.000')
+        ->assertJsonPath('summary.onHandByUnit.pcs', '500.000')
+        ->assertJsonPath('inventoryByCategory.0.materialCount', 2)
+        ->assertJsonPath('agingBuckets.0.batchCount', 1)
+        ->assertJsonPath('agingBuckets.1.batchCount', 1)
+        ->assertJsonCount(2, 'movementTrendsByUnit')
+        ->assertJsonPath('movementTrendsByUnit.0.unit', 'kg')
+        ->assertJsonPath('movementTrendsByUnit.0.months.0.received', '120.000')
+        ->assertJsonPath('movementTrendsByUnit.0.months.0.issued', '20.000')
+        ->assertJsonPath('movementTrendsByUnit.1.unit', 'pcs')
+        ->assertJsonPath('movementTrendsByUnit.1.months.0.received', '500.000');
+
+    $this->getJson(route('warehouse.management.dashboard', [
+        'from' => '2026-10-01',
+        'to' => '2026-10-28',
+        'location' => 'Ingredient rack',
+    ]))
+        ->assertOk()
+        ->assertJsonCount(1, 'movementTrendsByUnit')
+        ->assertJsonPath('movementTrendsByUnit.0.unit', 'kg');
+});
+
+test('seeded material history populates management charts and peso cost exposure', function () {
+    $this->travelTo(CarbonImmutable::parse('2026-10-28 16:00:00'));
+    $manager = User::factory()->create(['role' => 'Management']);
+    $this->seed(AnalyticsDemoSeeder::class);
+
+    $this->actingAs($manager)
+        ->getJson(route('warehouse.management.dashboard', ['from' => '2026-07-01', 'to' => '2026-10-28']))
+        ->assertOk()
+        ->assertJsonPath('summary.materialCount', 7)
+        ->assertJsonPath('summary.inventoryValueByCurrency.PHP', '582390.00')
+        ->assertJsonPath('summary.expiredBatchCount', 2)
+        ->assertJsonPath('summary.expiringBatchCount', 1)
+        ->assertJsonPath('summary.heldBatchCount', 1)
+        ->assertJsonCount(3, 'movementTrendsByUnit')
+        ->assertJsonPath('movementTrendsByUnit.0.unit', 'L')
+        ->assertJsonPath('movementTrendsByUnit.1.unit', 'kg')
+        ->assertJsonCount(4, 'movementTrendsByUnit.1.months')
+        ->assertJsonPath('movementTrendsByUnit.1.months.0.received', '2640.000')
+        ->assertJsonPath('movementTrendsByUnit.1.months.3.issued', '1640.000')
+        ->assertJsonPath('movementTrendsByUnit.2.unit', 'pcs')
+        ->assertJsonPath('nearExpiryCostExposure.0.currency', 'PHP')
+        ->assertJsonPath('nearExpiryCostExposure.0.estimatedValue', '36000.00');
 });
 
 test('management reports require authentication', function () {

@@ -36,21 +36,21 @@ class SampleErpDataSeeder extends Seeder
      */
     private const MATERIALS = [
         'SAMPLE-STEEL-001' => [
-            'name' => 'Sample Stainless Steel Coil',
+            'name' => 'Stainless Steel Coil',
             'category' => 'Sample Raw Materials',
             'unit' => 'kg',
             'minimum' => '20.000',
             'reorder' => '100.000',
         ],
         'SAMPLE-RESIN-001' => [
-            'name' => 'Sample Engineering Resin',
+            'name' => 'Engineering Resin Pellets',
             'category' => 'Sample Polymers',
             'unit' => 'kg',
             'minimum' => '15.000',
             'reorder' => '75.000',
         ],
         'SAMPLE-PCB-001' => [
-            'name' => 'Sample Control Board',
+            'name' => 'Industrial Control Board',
             'category' => 'Sample Electronics',
             'unit' => 'pcs',
             'minimum' => '10.000',
@@ -75,13 +75,15 @@ class SampleErpDataSeeder extends Seeder
         $materials = $this->seedMaterials();
         $supplier = $this->seedSupplier();
         $supplierMaterials = $this->seedSupplierMaterials($supplier, $materials);
+        $this->convertExistingSampleOrdersToPesos($materials, $supplierMaterials);
         $this->seedWarehouse();
 
         $today = CarbonImmutable::today();
+        $previousTestNow = Date::getTestNow();
 
         try {
             foreach ([3, 2, 1, 0] as $cycle => $monthsAgo) {
-                $cycleDate = $today->subMonths($monthsAgo)->setTime(10, 0);
+                $cycleDate = $today->subMonthsNoOverflow($monthsAgo)->subDays(10)->setTime(10, 0);
                 Date::setTestNow($cycleDate);
 
                 $this->seedProcurementCycle(
@@ -98,7 +100,7 @@ class SampleErpDataSeeder extends Seeder
             Date::setTestNow($today->setTime(10, 0));
             $this->seedAdditionalRequests($today, $actors, $materials);
         } finally {
-            Date::setTestNow();
+            Date::setTestNow($previousTestNow);
         }
     }
 
@@ -231,6 +233,7 @@ class SampleErpDataSeeder extends Seeder
                     'is_active' => true,
                 ],
             );
+            $materials[$code]->update(['name' => $attributes['name']]);
         }
 
         return $materials;
@@ -258,15 +261,15 @@ class SampleErpDataSeeder extends Seeder
     private function seedSupplierMaterials(Supplier $supplier, array $materials): array
     {
         $terms = [
-            'SAMPLE-STEEL-001' => ['SKU-STEEL-01', 12, '10.000', '5.000', '4.2500'],
-            'SAMPLE-RESIN-001' => ['SKU-RESIN-01', 8, '10.000', '5.000', '3.1500'],
-            'SAMPLE-PCB-001' => ['SKU-PCB-01', 18, '5.000', '5.000', '12.8000'],
+            'SAMPLE-STEEL-001' => ['SKU-STEEL-01', 12, '10.000', '5.000', '245.0000'],
+            'SAMPLE-RESIN-001' => ['SKU-RESIN-01', 8, '10.000', '5.000', '185.0000'],
+            'SAMPLE-PCB-001' => ['SKU-PCB-01', 18, '5.000', '5.000', '740.0000'],
         ];
         $supplierMaterials = [];
 
         foreach ($terms as $materialCode => [$sku, $leadTime, $minimum, $multiple, $price]) {
             $material = $materials[$materialCode];
-            $supplierMaterials[$materialCode] = SupplierMaterial::query()->firstOrCreate(
+            $supplierMaterials[$materialCode] = SupplierMaterial::query()->updateOrCreate(
                 [
                     'supplier_id' => $supplier->getKey(),
                     'material_id' => $material->getKey(),
@@ -277,7 +280,7 @@ class SampleErpDataSeeder extends Seeder
                     'minimum_order_qty' => $minimum,
                     'order_multiple_qty' => $multiple,
                     'quoted_unit_price' => $price,
-                    'currency_code' => 'USD',
+                    'currency_code' => 'PHP',
                     'is_preferred' => true,
                     'is_active' => true,
                 ],
@@ -285,6 +288,33 @@ class SampleErpDataSeeder extends Seeder
         }
 
         return $supplierMaterials;
+    }
+
+    /**
+     * @param  array<string, Material>  $materials
+     * @param  array<string, SupplierMaterial>  $supplierMaterials
+     */
+    private function convertExistingSampleOrdersToPesos(array $materials, array $supplierMaterials): void
+    {
+        PurchaseOrder::query()
+            ->where('order_number', 'like', 'SAMPLE-PO-%')
+            ->update(['currency_code' => 'PHP']);
+
+        foreach ($materials as $materialCode => $material) {
+            $price = (float) $supplierMaterials[$materialCode]->quoted_unit_price;
+            $sampleOrderItems = PurchaseOrderItem::query()
+                ->where('material_id', $material->getKey())
+                ->whereHas('purchaseOrder', fn ($query) => $query->where('order_number', 'like', 'SAMPLE-PO-%'))
+                ->get(['id', 'ordered_qty']);
+
+            foreach ($sampleOrderItems as $item) {
+                DB::table('purchase_order_items')->where('id', $item->getKey())->update([
+                    'unit_price' => number_format($price, 4, '.', ''),
+                    'line_total' => number_format((float) $item->ordered_qty * $price, 7, '.', ''),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
     }
 
     private function seedWarehouse(): void
@@ -389,7 +419,7 @@ class SampleErpDataSeeder extends Seeder
                 'supplier_id' => $supplier->getKey(),
                 'order_date' => $cycleDate->toDateString(),
                 'expected_delivery_date' => $cycleDate->addDays(7)->toDateString(),
-                'currency_code' => 'USD',
+                'currency_code' => 'PHP',
                 'notes' => 'Sample order linked to approved production demand.',
                 'created_by_user_id' => $actors['procurement']->getKey(),
             ]);
@@ -557,6 +587,7 @@ class SampleErpDataSeeder extends Seeder
             }
         }
 
+        Date::setTestNow($cycleDate->addDays(10)->setTime(10, 0));
         $productionMaterialCode = array_keys($quantities)[($cycleNumber - 1) % count($quantities)];
         $productionRequestNumber = sprintf('SAMPLE-PMR-%02d', $cycleNumber);
         $productionRequest = ProductionMaterialRequest::query()

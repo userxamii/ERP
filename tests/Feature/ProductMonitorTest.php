@@ -14,6 +14,10 @@ test('serves the product monitor styles and scripts', function () {
     $this->get('/product-monitor/script.js')
         ->assertStatus(200)
         ->assertHeader('Content-Type', 'text/javascript; charset=UTF-8');
+
+    $this->get(route('product-monitor.brand-logo'))
+        ->assertOk()
+        ->assertHeader('Content-Type', 'image/png');
 });
 
 test('includes the operations page in the warehouse workspace navigation', function () {
@@ -100,6 +104,9 @@ test('management report tabs scroll to their sections without changing applicati
         ->toContain('id="management-analytics"')
         ->toContain('id="management-departments"')
         ->toContain('id="management-decisions"')
+        ->toContain('function renderMovementChart(rows, unit)')
+        ->toContain('renderMovementAnalytics(data.movementTrendsByUnit)')
+        ->toContain('currency: "PHP"')
         ->not->toContain('management-report-center');
 });
 

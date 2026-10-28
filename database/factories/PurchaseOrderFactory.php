@@ -30,7 +30,7 @@ class PurchaseOrderFactory extends Factory
             'order_date' => now()->toDateString(),
             'expected_delivery_date' => now()->addDays(14)->toDateString(),
             'status' => PurchaseOrderStatus::Draft,
-            'currency_code' => 'USD',
+            'currency_code' => 'PHP',
             'notes' => null,
             'created_by_user_id' => User::factory(),
         ];

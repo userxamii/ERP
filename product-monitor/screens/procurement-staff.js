@@ -97,7 +97,7 @@ function renderOrderForm(data) {
     const supplierTerms = data.supplierMaterials.map(item => `
         <option value="${escape(item.id)}" data-supplier-id="${escape(item.supplierId)}" data-material-id="${escape(item.materialId)}">${escape(item.supplier)} · ${escape(item.material)} (min ${escape(item.minimumOrderQuantity)})</option>
     `).join("");
-    const currencies = data.currencies.map(currency => `<option value="${escape(currency)}">${escape(currency)}</option>`).join("");
+    const currencies = data.currencies.map(currency => `<option value="${escape(currency)}" ${currency === "PHP" ? "selected" : ""}>${escape(currency)}</option>`).join("");
 
     return `
         <details class="procurement-form-details">

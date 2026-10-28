@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
+import brandLogo from '@/lib/Universal RObina logo.png';
 
 interface LoginForm {
     email: string;
@@ -36,7 +37,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     };
 
     return (
-        <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
+        <AuthLayout title="Log in to your account" description="Enter your email and password below to log in" brandLogo={brandLogo}>
             <Head title="Log in" />
 
             <form className="flex flex-col gap-6" onSubmit={submit}>
@@ -61,7 +62,11 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         <div className="flex items-center">
                             <Label htmlFor="password">Password</Label>
                             {canResetPassword && (
-                                <TextLink href={route('password.request')} className="ml-auto text-sm" tabIndex={5}>
+                                <TextLink
+                                    href={route('password.request')}
+                                    className="ml-auto text-sm text-[#e60012] hover:text-[#bd0010]"
+                                    tabIndex={5}
+                                >
                                     Forgot password?
                                 </TextLink>
                             )}
@@ -80,11 +85,21 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     </div>
 
                     <div className="flex items-center space-x-3">
-                        <Checkbox id="remember" name="remember" tabIndex={3} />
+                        <Checkbox
+                            id="remember"
+                            name="remember"
+                            tabIndex={3}
+                            className="focus-visible:ring-[#e60012] data-[state=checked]:border-[#e60012] data-[state=checked]:bg-[#e60012]"
+                        />
                         <Label htmlFor="remember">Remember me</Label>
                     </div>
 
-                    <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
+                    <Button
+                        type="submit"
+                        className="mt-4 w-full bg-[#e60012] text-white hover:bg-[#bd0010] focus-visible:ring-[#e60012]"
+                        tabIndex={4}
+                        disabled={processing}
+                    >
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                         Log in
                     </Button>
@@ -92,7 +107,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
 
                 <div className="text-muted-foreground text-center text-sm">
                     Don't have an account?{' '}
-                    <TextLink href={route('register')} tabIndex={5}>
+                    <TextLink href={route('register')} className="text-[#e60012] hover:text-[#bd0010]" tabIndex={5}>
                         Sign up
                     </TextLink>
                 </div>

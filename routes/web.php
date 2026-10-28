@@ -10,12 +10,19 @@ use App\Http\Controllers\WarehouseAuthController;
 use App\Http\Controllers\WarehouseWorkspaceController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 Route::get('/', function () {
     return response()->file(base_path('product-monitor/index.html'));
 })->name('home');
 
 Route::prefix('product-monitor')->group(function () {
+    Route::get('brand-logo.png', function (): BinaryFileResponse {
+        return response()->file(resource_path('js/lib/Universal RObina logo.png'), [
+            'Content-Type' => 'image/png',
+        ]);
+    })->name('product-monitor.brand-logo');
+
     Route::get('style.css', function () {
         return response()->file(base_path('product-monitor/style.css'), [
             'Content-Type' => 'text/css; charset=UTF-8',

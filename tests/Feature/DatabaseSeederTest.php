@@ -1,10 +1,14 @@
 <?php
 
+use App\Models\Material;
 use App\Models\User;
+use Carbon\CarbonImmutable;
+use Database\Seeders\AnalyticsDemoSeeder;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
 test('database seeder creates repeatable ERP data without adding users', function () {
+    $this->travelTo(CarbonImmutable::parse('2026-10-28 16:00:00'));
     $existingUser = User::factory()->create([
         'email' => 'test@example.com',
         'role' => 'Warehouse Staff',
@@ -38,8 +42,72 @@ test('database seeder creates repeatable ERP data without adding users', functio
             ->count())->toBe(1)
         ->and(DB::table('inventory_batches')
             ->where('storage_location', 'SAMPLE-WH-01 / A-01')
-            ->count())->toBeGreaterThan(0);
+            ->count())->toBeGreaterThan(0)
+        ->and(Material::query()->whereIn('code', [
+            'RM-SUGAR-001',
+            'RM-COCOA-001',
+            'RM-MILK-001',
+            'RM-OIL-001',
+            'PKG-BOTTLE-001',
+            'PKG-CAP-001',
+            'PKG-LABEL-001',
+        ])->count())->toBe(7)
+        ->and(DB::table('purchase_orders')
+            ->where('order_number', 'like', 'ANL-PO-%')
+            ->where('currency_code', 'PHP')
+            ->count())->toBe(4)
+        ->and(DB::table('inventory_movements')
+            ->where('source_reference', 'like', 'ANL-REC-%')
+            ->count())->toBe(28)
+        ->and(DB::table('inventory_movements')
+            ->where('source_reference', 'like', 'ANL-PMR-%')
+            ->count())->toBe(27);
+
+    $this->assertDatabaseMissing('inventory_movements', [
+        ['occurred_at', '>', '2026-10-28 16:00:00'],
+    ]);
 });
+
+test('analytics seeder posts four months of peso transactions without future or duplicate movements', function (string $date, string $milkExpiry) {
+    $referenceTime = CarbonImmutable::parse($date.' 16:00:00');
+    $this->travelTo($referenceTime);
+    User::factory()->create(['role' => 'Warehouse Staff']);
+
+    $this->seed(AnalyticsDemoSeeder::class);
+    $this->seed(AnalyticsDemoSeeder::class);
+
+    expect(DB::table('goods_receipts')->orderBy('receipt_number')->pluck('receipt_number')->all())->toBe([
+        'ANL-REC-202607',
+        'ANL-REC-202608',
+        'ANL-REC-202609',
+        'ANL-REC-202610',
+    ]);
+    expect(DB::table('goods_receipts')->where('status', 'posted')->count())->toBe(4);
+    expect(DB::table('purchase_orders')->where('status', 'ordered')->where('currency_code', 'PHP')->count())->toBe(4);
+    expect(DB::table('purchase_order_item_allocations')->count())->toBe(28);
+    expect(DB::table('deliveries')->where('status', 'received')->count())->toBe(4);
+    expect(DB::table('inventory_batches')->where('lot_code', 'like', 'ANL-%')->count())->toBe(28);
+    expect(DB::table('production_material_requests')->where('status', 'fulfilled')->count())->toBe(27);
+    expect(DB::table('inventory_movements')->where('movement_type', 'goods_receipt_accepted')->count())->toBe(28);
+    expect(DB::table('inventory_movements')->where('movement_type', 'stock_out')->count())->toBe(27);
+    expect(DB::table('inventory_movements')->where('occurred_at', '>', $referenceTime)->exists())->toBeFalse();
+    expect(DB::table('procurement_activities')->where('occurred_at', '>', $referenceTime)->exists())->toBeFalse();
+    expect(now()->toDateTimeString())->toBe($date.' 16:00:00');
+
+    $this->assertDatabaseHas('inventory_batches', [
+        'lot_code' => 'ANL-202610-RM-MILK-001',
+        'expires_at' => $milkExpiry.' 00:00:00',
+        'quantity_on_hand' => '160.000',
+    ]);
+    $this->assertDatabaseHas('inventory_batches', [
+        'lot_code' => 'ANL-202610-RM-COCOA-001',
+        'quality_status' => 'held',
+        'quantity_on_hand' => '360.000',
+    ]);
+})->with([
+    'current month' => ['2026-10-28', '2026-11-15'],
+    'first day of month' => ['2026-10-01', '2026-10-19'],
+]);
 
 test('database seeder preserves an existing account with the default email', function () {
     $existingUser = User::factory()->create([

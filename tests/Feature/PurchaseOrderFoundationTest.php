@@ -104,7 +104,7 @@ test('purchase order items require matching units and active supplier material t
         'minimum_order_qty' => '5.000',
         'order_multiple_qty' => '2.500',
         'quoted_unit_price' => '4.0000',
-        'currency_code' => 'USD',
+        'currency_code' => 'PHP',
     ]);
     $purchaseOrderItem = PurchaseOrderItem::factory()
         ->for($purchaseOrder)

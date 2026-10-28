@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
 
         if (User::query()->exists()) {
             $this->call(SampleErpDataSeeder::class);
+            $this->call(AnalyticsDemoSeeder::class);
 
             return;
         }

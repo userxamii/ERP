@@ -14,7 +14,14 @@ use App\PurchaseRequestApprovalDecision;
 use App\PurchaseRequestStatus;
 use Database\Seeders\ProcurementProductSeeder;
 
-test('the procurement product seeder makes Product A through J selectable', function () {
+test('the procurement product seeder replaces placeholder names while preserving existing materials', function () {
+    $existingMaterial = Material::factory()->create([
+        'code' => 'PROD-A',
+        'name' => 'Product A',
+        'minimum_stock_qty' => '5.000',
+    ]);
+
+    $this->seed(ProcurementProductSeeder::class);
     $this->seed(ProcurementProductSeeder::class);
 
     $staff = User::factory()->create(['role' => 'Procurement Staff']);
@@ -24,16 +31,24 @@ test('the procurement product seeder makes Product A through J selectable', func
         ->assertOk()
         ->assertJsonCount(10, 'materials')
         ->assertJsonPath('materials.0.code', 'PROD-A')
-        ->assertJsonPath('materials.0.name', 'Product A')
+        ->assertJsonPath('materials.0.name', 'Piattos Cheese 40g')
         ->assertJsonPath('materials.9.code', 'PROD-J')
-        ->assertJsonPath('materials.9.name', 'Product J');
+        ->assertJsonPath('materials.9.name', 'Nissin Cup Noodles Mini Seafood 40g');
 
     $this->actingAs($staff)
         ->getJson(route('warehouse.procurement.requests'))
         ->assertOk()
         ->assertJsonCount(10, 'materials')
-        ->assertJsonPath('materials.0.name', 'Product A')
-        ->assertJsonPath('materials.9.name', 'Product J');
+        ->assertJsonPath('materials.0.name', 'Piattos Cheese 40g')
+        ->assertJsonPath('materials.9.name', 'Nissin Cup Noodles Mini Seafood 40g');
+
+    $this->assertDatabaseHas('materials', [
+        'id' => $existingMaterial->getKey(),
+        'code' => 'PROD-A',
+        'name' => 'Piattos Cheese 40g',
+        'unit_of_measure_id' => $existingMaterial->unit_of_measure_id,
+        'minimum_stock_qty' => '5.000',
+    ]);
 });
 
 test('procurement staff can view real material requirements and create requests as drafts', function () {

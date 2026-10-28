@@ -27,7 +27,7 @@ class SupplierMaterialFactory extends Factory
             'minimum_order_qty' => '10.000',
             'order_multiple_qty' => null,
             'quoted_unit_price' => '12.3456',
-            'currency_code' => 'USD',
+            'currency_code' => 'PHP',
             'is_preferred' => false,
             'is_active' => true,
         ];
