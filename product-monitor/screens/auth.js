@@ -1,12 +1,9 @@
-function renderAccountOptions() {
-    return Object.keys(rolePermissions)
-        .filter(role => role !== "System Administrator")
-        .map(role => `<option value="${escapeHTML(role)}">${escapeHTML(role)}</option>`)
-        .join("");
-}
-
 function renderAuthMessage(message, className = "auth-message") {
     return message ? `<p class="${className}" role="status">${escapeHTML(message)}</p>` : "";
+}
+
+function renderBrandLogo() {
+    return '<div class="login-brand"><img class="login-brand-logo" src="/product-monitor/brand-logo.png" alt="Universal Robina Corporation" width="554" height="554" fetchpriority="high"></div>';
 }
 
 function renderLoginPage(message = "", email = "") {
@@ -14,8 +11,8 @@ function renderLoginPage(message = "", email = "") {
         <div class="login-shell">
             <section class="login-card" aria-labelledby="authTitle">
                 <div class="login-header">
-                    <div class="auth-icon-badge"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg></div>
-                    <p class="eyebrow">SECURE ACCESS</p>
+                    ${renderBrandLogo()}
+                    <p class="eyebrow">WAREHOUSE MANAGEMENT</p>
                     <h2 id="authTitle">Welcome back</h2>
                     <p>Sign in to continue to your assigned role workspace.</p>
                 </div>
@@ -44,7 +41,7 @@ function renderChangePasswordPage(message = "") {
         <div class="login-shell">
             <section class="login-card" aria-labelledby="authTitle">
                 <div class="login-header">
-                    <div class="auth-icon-badge"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2 4 5v6c0 5.25 3.4 9.1 8 11 4.6-1.9 8-5.75 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
+                    ${renderBrandLogo()}
                     <p class="eyebrow">SECURE YOUR ACCOUNT</p>
                     <h2 id="authTitle">Change your temporary password</h2>
                     <p>Choose a private password only you know. You must change the temporary password before continuing.</p>

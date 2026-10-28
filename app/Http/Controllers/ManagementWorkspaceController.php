@@ -55,8 +55,9 @@ class ManagementWorkspaceController extends Controller
             ->filter(fn (array $row): bool => $filters['location'] === null || $row['batchCount'] > 0)
             ->values();
         $movements = $this->movementQuery($filters)->with([
-            'material:id,code,name,material_category_id',
+            'material:id,code,name,material_category_id,unit_of_measure_id',
             'material.category:id,name',
+            'material.unitOfMeasure:id,code',
             'inventoryBatch:id,storage_location',
             'actor:id,name',
         ])->orderBy('occurred_at')->get();
@@ -105,6 +106,14 @@ class ManagementWorkspaceController extends Controller
             'agingBuckets' => $this->agingBuckets($batches),
             'expiryTrend' => $this->expiryTrend($batches),
             'movementTrend' => $this->movementTrend($movements, $filters),
+            'movementTrendsByUnit' => $movements
+                ->groupBy(fn (InventoryMovement $movement): string => $movement->material->unitOfMeasure?->code ?? 'unit')
+                ->sortKeys()
+                ->map(fn (Collection $unitMovements, string $unit): array => [
+                    'unit' => $unit,
+                    'months' => $this->movementTrend($unitMovements, $filters),
+                ])
+                ->values(),
             'topMaterials' => $this->topMaterials($movements),
             'topUsers' => $this->topUsers($movements),
             'topWorkCenters' => $this->topWorkCenters($movements),
@@ -241,6 +250,9 @@ class ManagementWorkspaceController extends Controller
         return [
             'materialCount' => $inventoryRows->count(),
             'onHandQuantity' => number_format($inventoryRows->sum(fn (array $row): float => (float) $row['onHandQuantity']), 3, '.', ''),
+            'onHandByUnit' => $inventoryRows
+                ->groupBy('unit')
+                ->map(fn (Collection $rows): string => number_format($rows->sum(fn (array $row): float => (float) $row['onHandQuantity']), 3, '.', '')),
             'lowStockCount' => $inventoryRows->where('lowStock', true)->count(),
             'expiredBatchCount' => $batches->filter(fn (InventoryBatch $batch): bool => $batch->quantity_on_hand > 0
                 && $batch->expires_at !== null && $batch->expires_at->lt($now))->count(),
@@ -262,7 +274,7 @@ class ManagementWorkspaceController extends Controller
 
     /**
      * @param  Collection<int, array<string, mixed>>  $inventoryRows
-     * @return Collection<int, array{name: string, quantity: string}>
+     * @return Collection<int, array{name: string, quantity: string, materialCount: int}>
      */
     private function inventoryByCategory(Collection $inventoryRows): Collection
     {
@@ -270,19 +282,21 @@ class ManagementWorkspaceController extends Controller
             ->groupBy('category')
             ->map(fn (Collection $rows, string $category): array => [
                 'name' => $category,
+                'materialCount' => $rows->count(),
                 'quantity' => number_format($rows->sum(fn (array $row): float => (float) $row['onHandQuantity']), 3, '.', ''),
             ])
-            ->sortByDesc(fn (array $row): float => (float) $row['quantity'])
+            ->sortByDesc('materialCount')
             ->values();
     }
 
     /**
      * @param  Collection<int, InventoryBatch>  $batches
-     * @return Collection<int, array{label: string, quantity: string}>
+     * @return Collection<int, array{label: string, quantity: string, batchCount: int}>
      */
     private function agingBuckets(Collection $batches): Collection
     {
         $buckets = ['0-30 days' => 0.0, '31-60 days' => 0.0, '61-90 days' => 0.0, '91+ days' => 0.0];
+        $batchCounts = array_fill_keys(array_keys($buckets), 0);
 
         foreach ($batches as $batch) {
             if ($batch->received_at === null || (float) $batch->quantity_on_hand <= 0) {
@@ -297,11 +311,13 @@ class ManagementWorkspaceController extends Controller
                 default => '91+ days',
             };
             $buckets[$label] += (float) $batch->quantity_on_hand;
+            $batchCounts[$label]++;
         }
 
         return collect($buckets)->map(fn (float $quantity, string $label): array => [
             'label' => $label,
             'quantity' => number_format($quantity, 3, '.', ''),
+            'batchCount' => $batchCounts[$label],
         ])->values();
     }
 
@@ -383,7 +399,7 @@ class ManagementWorkspaceController extends Controller
 
     /**
      * @param  Collection<int, InventoryMovement>  $movements
-     * @return Collection<int, array{code: string, name: string, quantity: string}>
+     * @return Collection<int, array{code: string, name: string, quantity: string, unit: string}>
      */
     private function topMaterials(Collection $movements): Collection
     {
@@ -393,6 +409,7 @@ class ManagementWorkspaceController extends Controller
             ->map(fn (Collection $rows): array => [
                 'code' => $rows->first()->material->code,
                 'name' => $rows->first()->material->name,
+                'unit' => $rows->first()->material->unitOfMeasure?->code ?? 'unit',
                 'quantity' => number_format($rows->sum(fn (InventoryMovement $movement): float => (float) $movement->quantity), 3, '.', ''),
             ])
             ->sortByDesc(fn (array $row): float => (float) $row['quantity'])

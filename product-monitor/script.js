@@ -1,7 +1,7 @@
 const inventory = [
     {
         id: "B-001",
-        name: "Product A",
+        name: "Piattos Cheese 40g",
         batch: "B-001",
         quantity: 120,
         received: "2026-09-10",
@@ -10,7 +10,7 @@ const inventory = [
     },
     {
         id: "B-002",
-        name: "Product B",
+        name: "C2 Apple 335mL",
         batch: "B-002",
         quantity: 85,
         received: "2026-08-20",
@@ -19,7 +19,7 @@ const inventory = [
     },
     {
         id: "B-003",
-        name: "Product C",
+        name: "C2 Lemon 355mL",
         batch: "B-003",
         quantity: 64,
         received: "2026-08-10",
@@ -28,7 +28,7 @@ const inventory = [
     },
     {
         id: "B-004",
-        name: "Product D",
+        name: "Great Taste Premium 25g",
         batch: "B-004",
         quantity: 12,
         received: "2026-06-20",
@@ -37,7 +37,7 @@ const inventory = [
     },
     {
         id: "B-005",
-        name: "Product E",
+        name: "Great Taste White Twin Pack",
         batch: "B-005",
         quantity: 40,
         received: "2026-09-30",
@@ -46,7 +46,7 @@ const inventory = [
     },
     {
         id: "B-006",
-        name: "Product F",
+        name: "Cream-O Vanilla 30g",
         batch: "B-006",
         quantity: 32,
         received: "2026-08-01",

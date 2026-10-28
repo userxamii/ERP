@@ -29,6 +29,7 @@ const productMonitorGlobals = [
     'readAlertIds',
     'renderAgeBadge',
     'renderAlertIcon',
+    'renderChangePasswordPage',
     'renderDashboardAlert',
     'renderEmptyState',
     'renderLoginPage',
